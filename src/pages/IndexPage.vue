@@ -1,7 +1,5 @@
 <template>
   <q-page class="row items-center justify-evenly">
-
-
     <div v-if="isAuthenticated">
       user
       <div>
@@ -21,9 +19,22 @@
 <script setup lang="ts">
 import {useFirebase} from 'src/composables/firebase';
 import {useAuth} from '@vueuse/firebase/useAuth';
-import {GoogleAuthProvider, signInWithPopup, signOut} from 'firebase/auth'
-const {auth} = useFirebase()
-const {isAuthenticated, user} = useAuth(auth)
-const signIn = () => signInWithPopup(auth, new GoogleAuthProvider())
+import {GoogleAuthProvider, signInWithPopup, signOut, getAdditionalUserInfo} from 'firebase/auth'
+
+import { doc, setDoc} from 'firebase/firestore'
+
+const {auth, db} = useFirebase()
+const {isAuthenticated} = useAuth(auth)
+const signIn = () => signInWithPopup(auth, new GoogleAuthProvider()).then(
+  async (result) => {
+    const isNewUser = getAdditionalUserInfo(result)?.isNewUser
+    console.log(result.user)
+    const {email, displayName, photoURL, uid} = result.user
+
+    if (isNewUser) {
+      await setDoc(doc(db, 'users', uid), {email, displayName, photoURL})
+    }
+  }
+)
 const logout = () => signOut(auth)
 </script>

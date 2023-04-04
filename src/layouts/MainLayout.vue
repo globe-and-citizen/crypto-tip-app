@@ -2,11 +2,11 @@
   <q-layout view="lHh Lpr lFf">
     <q-header elevated>
       <q-toolbar>
-        <q-toolbar-title class="text-center" >
+        <q-toolbar-title class="text-center">
           Crypto Tips
         </q-toolbar-title>
 
-        <q-btn dense flat round icon="menu" @click="toggleRightDrawer" />
+        <q-btn dense flat round icon="menu" @click="toggleRightDrawer"/>
       </q-toolbar>
     </q-header>
 
@@ -17,15 +17,25 @@
       >
         Essential Links
       </q-item-label>
-      <div v-if="isAuthenticated">
-        <div>{{user.email}}</div>
-        <button @click="logout">
-          Log Out
-        </button>
-      </div>
+
+      <q-item v-if="isAuthenticated"
+              clickable
+              tag="a"
+              @click="logout"
+      >
+        <q-item-section
+          avatar
+        >
+          <q-icon name="logout"/>
+        </q-item-section>
+
+        <q-item-section>
+          <q-item-label>Log Out</q-item-label>
+        </q-item-section>
+      </q-item>
     </q-drawer>
     <q-page-container>
-      <router-view />
+      <router-view/>
     </q-page-container>
   </q-layout>
 </template>
@@ -38,9 +48,11 @@ import {signOut} from 'firebase/auth';
 
 const rightDrawerOpen = ref(false)
 const {auth} = useFirebase()
-const {isAuthenticated, user} = useAuth(auth)
-function toggleRightDrawer () {
+const {isAuthenticated} = useAuth(auth)
+
+function toggleRightDrawer() {
   rightDrawerOpen.value = !rightDrawerOpen.value
 }
+
 const logout = () => signOut(auth)
 </script>

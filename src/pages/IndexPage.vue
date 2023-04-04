@@ -1,9 +1,7 @@
 <template>
   <q-page class="row items-center justify-evenly">
     <div v-if="isAuthenticated">
-      <button @click="logout">
-        Log Out
-      </button>
+
     </div>
     <div v-else>
       <q-btn @click="signIn">
@@ -17,7 +15,7 @@
 import {useFirebase} from 'src/composables/firebase';
 import {useFirestore, useAuth} from '@vueuse/firebase';
 import {doc, setDoc, collection, where, query} from 'firebase/firestore'
-import {GoogleAuthProvider, signInWithPopup, signOut, getAdditionalUserInfo} from 'firebase/auth'
+import {GoogleAuthProvider, signInWithPopup,  getAdditionalUserInfo} from 'firebase/auth'
 import {computed} from 'vue';
 
 
@@ -40,6 +38,4 @@ let teamsQuery = computed(() =>
 )
 
 const teams = useFirestore(teamsQuery)
-console.log(teams.value)
-const logout = () => signOut(auth)
 </script>

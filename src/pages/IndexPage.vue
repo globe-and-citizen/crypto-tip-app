@@ -1,7 +1,18 @@
 <template>
-  <q-page class="row items-center justify-evenly">
+  <q-page class="justify-evenly">
     <div v-if="isAuthenticated">
 
+      <div class="q-pa-md">
+        <div class="q-gutter-md">
+          <q-input label="Standard" />
+        </div>
+      </div>
+      <!-- drawer content -->
+      <q-item-label
+        header
+      >
+        Essential Links
+      </q-item-label>
     </div>
     <div v-else>
       <q-btn @click="signIn">

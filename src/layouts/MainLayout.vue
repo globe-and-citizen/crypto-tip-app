@@ -1,15 +1,5 @@
 <template>
   <q-layout view="lHh Lpr lFf">
-    <q-header elevated>
-      <q-toolbar>
-        <q-toolbar-title class="text-center">
-          Crypto Tips
-        </q-toolbar-title>
-
-        <q-btn dense flat round icon="menu" @click="toggleRightDrawer"/>
-      </q-toolbar>
-    </q-header>
-
     <q-drawer show-if-above v-model="rightDrawerOpen" side="right" bordered>
       <!-- drawer content -->
       <q-item-label

@@ -1,18 +1,19 @@
 <template>
-  <q-page class="justify-evenly">
-    <div v-if="isAuthenticated">
+  <q-header elevated>
+    <q-toolbar>
+      <q-toolbar-title class="text-center">
+        Crypto Tips
+      </q-toolbar-title>
 
-      <div class="q-pa-md">
-        <div class="q-gutter-md">
-          <q-input label="Standard" />
-        </div>
-      </div>
-      <!-- drawer content -->
-      <q-item-label
-        header
-      >
-        Essential Links
-      </q-item-label>
+      <q-btn dense flat round icon="menu" @click="toggleRightDrawer"/>
+    </q-toolbar>
+  </q-header>
+
+  <q-page class="justify-evenly">
+    <div v-if="isAuthenticated" class="q-pa-md">
+      <q-btn to="/addTeam">
+        Add Team
+      </q-btn>
     </div>
     <div v-else>
       <q-btn @click="signIn">
@@ -26,7 +27,7 @@
 import {useFirebase} from 'src/composables/firebase';
 import {useFirestore, useAuth} from '@vueuse/firebase';
 import {doc, setDoc, collection, where, query} from 'firebase/firestore'
-import {GoogleAuthProvider, signInWithPopup,  getAdditionalUserInfo} from 'firebase/auth'
+import {GoogleAuthProvider, signInWithPopup, getAdditionalUserInfo} from 'firebase/auth'
 import {computed} from 'vue';
 
 

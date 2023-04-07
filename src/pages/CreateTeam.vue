@@ -1,16 +1,9 @@
 <template>
-
-  <q-header elevated>
-    <q-toolbar>
-
-      <q-btn dense flat round icon="arrow_back" to="/"/>
-      <q-toolbar-title class="text-center">
-        Crypto Tip vs
-      </q-toolbar-title>
-
-      <q-btn dense flat round icon="menu" @click="toggleRightDrawer"/>
-    </q-toolbar>
-  </q-header>
+  <AppHeader
+    title="Create Team"
+    back_link="/"
+    @toggleRightDrawer="toggleAction()"
+  ></AppHeader>
   <q-page-container>
     <div class="q-pa-md">
       <div class="q-gutter-md items-right">
@@ -35,7 +28,12 @@
 </template>
 
 <script setup lang="ts">
+import AppHeader from 'components/AppHeader.vue';
 
+const toggleAction = function () {
+  const i = 0;
+  console.log(i)
+}
 </script>
 
 <style scoped>

@@ -1,6 +1,7 @@
 <template>
   <q-layout view="lHh Lpr lFf">
-    <q-drawer show-if-above v-model="rightDrawerOpen" side="right" bordered>
+    <q-drawer show-if-above :model-value="appStore.getRightDrawerOpen" side="right" bordered
+              @update:modelValue="appStore.toggleDrawer()">
       <!-- drawer content -->
       <q-item-label
         header
@@ -31,18 +32,14 @@
 </template>
 
 <script setup lang="ts">
-import {ref} from 'vue';
 import {useFirebase} from 'src/composables/firebase';
 import {useAuth} from '@vueuse/firebase';
 import {signOut} from 'firebase/auth';
+import {useAppStore} from 'src/stores';
 
-const rightDrawerOpen = ref(false)
+const appStore = useAppStore()
 const {auth} = useFirebase()
 const {isAuthenticated} = useAuth(auth)
-
-function toggleRightDrawer() {
-  rightDrawerOpen.value = !rightDrawerOpen.value
-}
 
 const logout = () => signOut(auth)
 </script>

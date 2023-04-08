@@ -1,24 +1,36 @@
 <template>
   <AppHeader
-    title="Create Team"
+    title="Create New Team"
     back_link="/"
-    @toggleRightDrawer="toggleAction()"
-  ></AppHeader>
+    @toggleRightDrawer="appStore.toggleDrawer()"
+  />
   <q-page-container>
     <div class="q-pa-md">
       <div class="q-gutter-md items-right">
         <q-input
           outlined
+          v-model="team.name"
           label="Team Name"/>
         <q-input
           outlined
+          v-model="team.description"
           type="textarea"
           label="Description"/>
         <q-input
           outlined
-          label="Member Address"/>
+          v-for="(m, i) in team.members"
+          v-model="team.members[i]"
+          :key="i"
+          label="Member Address">
+          <template v-slot:before>
+            <q-icon name="add" color="primary" @click="addTeamMember(i+1)"/>
+            <q-icon name="remove" v-if="i !== team.members.length - 1"/>
+            <q-icon name="remove" color="red" @click="removeTeamMember(i)"
+                    v-if="team.members.length>1 && i === team.members.length - 1"/>
+          </template>
+        </q-input>
         <!--        <q-btn round color="primary" icon="add" class="float-right"/>-->
-        <q-btn class="float-right" style="display: block">
+        <q-btn class="float-right" @click="createTeam()">
           Add Team
         </q-btn>
       </div>
@@ -29,10 +41,50 @@
 
 <script setup lang="ts">
 import AppHeader from 'components/AppHeader.vue';
+import {useAppStore} from 'src/stores';
+import {ref} from 'vue';
+import {useFirebase} from 'src/composables/firebase';
+import {useAuth} from '@vueuse/firebase';
+import {doc, setDoc} from 'firebase/firestore';
+import {ulid} from 'ulid'
+import {useQuasar} from 'quasar';
 
-const toggleAction = function () {
-  const i = 0;
-  console.log(i)
+const appStore = useAppStore()
+const {auth, db} = useFirebase()
+const {isAuthenticated, user} = useAuth(auth)
+
+const $q = useQuasar()
+
+if (!isAuthenticated) {
+  // TODO redirect to home page
+}
+const initialTeamValue = {
+  name: '',
+  description: '',
+  address: '',
+  members: ['1', '2'],
+  user: user.value?.uid
+}
+const team = ref(initialTeamValue)
+
+const addTeamMember = function (index: number) {
+  team.value.members.splice(index, 0, 'new one')
+}
+
+const removeTeamMember = function (index: number) {
+  if (index != -1 && index !== team.value.members.length - 1) {
+    team.value.members.slice(index, 2)
+  }
+  if (index === team.value.members.length - 1) {
+    team.value.members.pop()
+  }
+}
+const createTeam = async function () {
+  const id = ulid()
+  await setDoc(doc(db, 'teams', id), team.value).then(function () {
+    team.value = initialTeamValue
+    $q.notify({type: 'positive', message: 'Teal successfully Created'})
+  })
 }
 </script>
 

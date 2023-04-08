@@ -1,14 +1,8 @@
 <template>
-  <q-header elevated>
-    <q-toolbar>
-      <q-toolbar-title class="text-center">
-        Crypto Tips
-      </q-toolbar-title>
-
-      <q-btn dense flat round icon="menu" @click="toggleRightDrawer"/>
-    </q-toolbar>
-  </q-header>
-
+  <AppHeader
+    title="Crypto Tips"
+    @toggleRightDrawer="appStore.toggleDrawer()"
+  />
   <q-page class="justify-evenly">
     <div v-if="isAuthenticated" class="q-pa-md">
       <q-btn to="/addTeam">
@@ -29,7 +23,10 @@ import {useFirestore, useAuth} from '@vueuse/firebase';
 import {doc, setDoc, collection, where, query} from 'firebase/firestore'
 import {GoogleAuthProvider, signInWithPopup, getAdditionalUserInfo} from 'firebase/auth'
 import {computed} from 'vue';
+import AppHeader from 'components/AppHeader.vue';
+import {useAppStore} from 'src/stores';
 
+const appStore = useAppStore()
 
 const {auth, db} = useFirebase()
 const {isAuthenticated, user} = useAuth(auth)
@@ -41,7 +38,6 @@ const signIn = () => signInWithPopup(auth, new GoogleAuthProvider()).then(
     if (isNewUser) {
       await setDoc(doc(db, 'users', uid), {email, displayName, photoURL})
     }
-    console.log(user.value)
   }
 )
 

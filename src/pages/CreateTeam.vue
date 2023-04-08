@@ -62,7 +62,7 @@ const initialTeamValue = {
   name: '',
   description: '',
   address: '',
-  members: ['1', '2'],
+  members: ['', ''],
   user: user.value?.uid
 }
 const team = ref(initialTeamValue)
@@ -83,7 +83,7 @@ const createTeam = async function () {
   const id = ulid()
   await setDoc(doc(db, 'teams', id), team.value).then(function () {
     team.value = initialTeamValue
-    $q.notify({type: 'positive', message: 'Teal successfully Created'})
+    $q.notify({type: 'positive', message: 'Team successfully Created'})
   })
 }
 </script>

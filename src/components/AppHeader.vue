@@ -16,7 +16,7 @@ interface Props {
   back_link?: string;
 }
 
-const props = withDefaults(defineProps<Props>(), {
+withDefaults(defineProps<Props>(), {
   title: 'Crypto Tips'
 })
 </script>

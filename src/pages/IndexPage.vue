@@ -5,7 +5,7 @@
   />
   <q-page class="justify-evenly">
     <div v-if="isAuthenticated" class="q-pa-md">
-      {{ teams }}
+      <TeamComponent v-for="team in teams" :key="team.uid" :team="team"></TeamComponent>
       <q-btn to="/addTeam">
         Add Team
       </q-btn>
@@ -26,6 +26,7 @@ import {GoogleAuthProvider, signInWithPopup, getAdditionalUserInfo} from 'fireba
 import {computed} from 'vue';
 import AppHeader from 'components/AppHeader.vue';
 import {useAppStore} from 'src/stores';
+import TeamComponent from 'components/TeamComponent.vue';
 
 const appStore = useAppStore()
 

@@ -53,12 +53,14 @@ const appStore = useAppStore()
 const {auth, db} = useFirebase()
 const {isAuthenticated, user} = useAuth(auth)
 
+const id = ulid()
 const $q = useQuasar()
 
 if (!isAuthenticated) {
   // TODO redirect to home page
 }
 const initialTeamValue = {
+  uid: id,
   name: '',
   description: '',
   address: '',
@@ -80,7 +82,6 @@ const removeTeamMember = function (index: number) {
   }
 }
 const createTeam = async function () {
-  const id = ulid()
   await setDoc(doc(db, 'teams', id), team.value).then(function () {
     team.value = initialTeamValue
     $q.notify({type: 'positive', message: 'Team successfully Created'})

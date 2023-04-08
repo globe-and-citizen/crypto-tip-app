@@ -48,5 +48,5 @@ let teamsQuery = computed(() => query(
 ))
 
 const teams = useFirestore(teamsQuery)
-console.log(teams.value)
+
 </script>

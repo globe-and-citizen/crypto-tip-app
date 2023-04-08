@@ -5,6 +5,7 @@
   />
   <q-page class="justify-evenly">
     <div v-if="isAuthenticated" class="q-pa-md">
+      {{ teams }}
       <q-btn to="/addTeam">
         Add Team
       </q-btn>
@@ -41,9 +42,11 @@ const signIn = () => signInWithPopup(auth, new GoogleAuthProvider()).then(
   }
 )
 
-let teamsQuery = computed(() =>
-  query(collection(db, 'teams'), where('userId', '==', user.value ? user.value.uid : ''))
-)
+let teamsQuery = computed(() => query(
+  collection(db, 'teams'),
+  where('user', '==', user.value ? user.value.uid : '')
+))
 
 const teams = useFirestore(teamsQuery)
+console.log(teams.value)
 </script>

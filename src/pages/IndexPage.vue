@@ -43,11 +43,11 @@ const signIn = () => signInWithPopup(auth, new GoogleAuthProvider()).then(
   }
 )
 
-let teamsQuery = computed(() => query(
+const teamsQuery = computed(() => query(
   collection(db, 'teams'),
   where('user', '==', user.value ? user.value.uid : '')
 ))
 
-const teams = useFirestore(teamsQuery)
+const teams = useFirestore(teamsQuery, undefined, { autoDispose: false })
 
 </script>

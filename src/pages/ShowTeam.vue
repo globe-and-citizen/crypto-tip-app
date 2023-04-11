@@ -6,7 +6,7 @@
   />
   <q-page-container>
     <div class="q-pa-md">ds</div>
-    {{ docs }}
+    {{ teamData }}
   </q-page-container>
 </template>
 
@@ -16,8 +16,8 @@ import { useAppStore } from 'src/stores'
 import { useFirebase } from 'src/composables/firebase'
 import { useAuth, useFirestore } from '@vueuse/firebase'
 import { useRouter } from 'vue-router'
-import { computed, onMounted, ref } from 'vue'
-import { collection, doc, query, where, getDoc } from 'firebase/firestore'
+import { computed, ref } from 'vue'
+import { doc } from 'firebase/firestore'
 
 const isLoading = ref(true)
 const router = useRouter()
@@ -25,16 +25,14 @@ if (!router.currentRoute.value.params.ulid) {
   router.push('/404')
 }
 
+const id = router.currentRoute.value.params.ulid
 const appStore = useAppStore()
 const { auth, db } = useFirebase()
-const { isAuthenticated, user } = useAuth(auth)
+const { isAuthenticated } = useAuth(auth)
 const docs = ref()
 isLoading.value = false
-onMounted(async () => {
-  await getDoc(doc(db, 'teams', '01GXGVV0DC07KHDK768WJJY1VG')).then((doc) => {
-    docs.value = doc.data()
-  })
-})
+const teamQuery = computed(() => doc(db, 'teams', id as string))
+const teamData = useFirestore(teamQuery, null)
 if (!isAuthenticated) {
   // TODO redirect to home page
 }

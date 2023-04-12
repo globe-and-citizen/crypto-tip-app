@@ -9,10 +9,13 @@
       <p>Team : {{ teamData.name }}</p>
       <p>Description : {{ teamData.description }}</p>
       <p>Members : {{ teamData.members.length }}</p>
-      <p>Member list</p>
+      <p>Member list :</p>
       <ul>
         <li v-for="member in teamData.members" :key="member">{{ member }}</li>
       </ul>
+
+      <q-input outlined v-model="tipsAmount" label="Tips Amount" />
+      <q-btn>Send Tips</q-btn>
     </div>
   </q-page-container>
 </template>
@@ -23,8 +26,15 @@ import { useAppStore } from 'src/stores'
 import { useFirebase } from 'src/composables/firebase'
 import { useAuth, useFirestore } from '@vueuse/firebase'
 import { useRouter } from 'vue-router'
-import { computed } from 'vue'
+import { computed, ref, Ref } from 'vue'
 import { doc } from 'firebase/firestore'
+
+interface TeamType {
+  uid: string
+  name: string
+  description: string
+  members: Array<string>
+}
 
 const router = useRouter()
 if (!router.currentRoute.value.params.ulid) {
@@ -35,9 +45,13 @@ const appStore = useAppStore()
 const { auth, db } = useFirebase()
 const { isAuthenticated } = useAuth(auth)
 
+const tipsAmount = ref()
+
 const id = router.currentRoute.value.params.ulid
 const teamQuery = computed(() => doc(db, 'teams', id as string))
-const teamData = useFirestore(teamQuery, null)
+const teamData = useFirestore(teamQuery, null) as Ref<
+  TeamType | undefined | null
+>
 
 if (!isAuthenticated) {
   // TODO redirect to home page

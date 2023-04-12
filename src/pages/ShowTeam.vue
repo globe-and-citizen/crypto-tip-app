@@ -14,6 +14,7 @@
         <li v-for="member in teamData.members" :key="member">{{ member }}</li>
       </ul>
 
+      <q-btn>Connect Your wallet</q-btn>
       <q-input outlined v-model="tipsAmount" label="Tips Amount" />
       <q-btn>Send Tips</q-btn>
     </div>

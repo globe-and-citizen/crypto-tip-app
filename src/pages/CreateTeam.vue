@@ -52,6 +52,8 @@ import { doc, setDoc } from 'firebase/firestore'
 import { ulid } from 'ulid'
 import { useQuasar } from 'quasar'
 import { ethers } from 'ethers'
+import { timeout } from 'workbox-core/_private'
+import { useRouter } from 'vue-router'
 
 const appStore = useAppStore()
 const { auth, db } = useFirebase()
@@ -59,6 +61,7 @@ const { isAuthenticated, user } = useAuth(auth)
 
 const id = ulid()
 const $q = useQuasar()
+const router = useRouter()
 
 if (!isAuthenticated) {
   // TODO redirect to home page
@@ -89,6 +92,7 @@ const createTeam = async function () {
   await setDoc(doc(db, 'teams', id), team.value).then(function () {
     team.value = initialTeamValue
     $q.notify({ type: 'positive', message: 'Team successfully Created' })
+    router.push('/')
   })
 }
 

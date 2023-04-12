@@ -1,4 +1,4 @@
-import { RouteRecordRaw } from 'vue-router';
+import { RouteRecordRaw } from 'vue-router'
 
 const routes: RouteRecordRaw[] = [
   {
@@ -7,7 +7,8 @@ const routes: RouteRecordRaw[] = [
     children: [
       { path: '', component: () => import('pages/IndexPage.vue') },
       { path: 'addTeam', component: () => import('pages/CreateTeam.vue') },
-      { path: 'showTeam/:ulid', component: () => import('pages/ShowTeam.vue') }
+      { path: 'showTeam/:ulid', component: () => import('pages/ShowTeam.vue') },
+      { path: 'updateTeam/:ulid', component: () => import('pages/UpdateTeam.vue') },
     ],
   },
 
@@ -17,6 +18,6 @@ const routes: RouteRecordRaw[] = [
     path: '/:catchAll(.*)*',
     component: () => import('pages/ErrorNotFound.vue'),
   },
-];
+]
 
-export default routes;
+export default routes

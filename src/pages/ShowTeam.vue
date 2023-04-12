@@ -14,7 +14,10 @@
         <li v-for="member in teamData.members" :key="member">{{ member }}</li>
       </ul>
 
-      <q-btn>Connect Your wallet</q-btn>
+      {{ userAddress }}
+      <q-btn @click="connectWallet()" v-if="!isConnected"
+        >Connect Your wallet</q-btn
+      >
       <q-input outlined v-model="tipsAmount" label="Tips Amount" />
       <q-btn>Send Tips</q-btn>
     </div>
@@ -25,6 +28,7 @@
 import AppHeader from 'components/AppHeader.vue'
 import { useAppStore } from 'src/stores'
 import { useFirebase } from 'src/composables/firebase'
+import { useWallet } from 'src/composables/wallet'
 import { useAuth, useFirestore } from '@vueuse/firebase'
 import { useRouter } from 'vue-router'
 import { computed, ref, Ref } from 'vue'
@@ -45,6 +49,7 @@ if (!router.currentRoute.value.params.ulid) {
 const appStore = useAppStore()
 const { auth, db } = useFirebase()
 const { isAuthenticated } = useAuth(auth)
+const { userAddress, isConnected, connectWallet } = useWallet()
 
 const tipsAmount = ref()
 

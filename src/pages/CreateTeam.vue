@@ -6,7 +6,7 @@
   />
   <q-page-container>
     <div class="q-pa-md">
-      <div class="q-gutter-md items-right">
+      <q-form @submit="onSubmit" @reset="onReset" class="q-gutter-md">
         <q-input outlined v-model="team.name" label="Team Name" />
         <q-input
           outlined
@@ -35,9 +35,18 @@
             />
           </template>
         </q-input>
-        <!--        <q-btn round color="primary" icon="add" class="float-right"/>-->
-        <q-btn class="float-right" @click="createTeam()"> Add Team</q-btn>
-      </div>
+
+        <div>
+          <q-btn label="Add Team" type="submit" color="primary" />
+          <q-btn
+            label="Reset"
+            type="reset"
+            color="primary"
+            flat
+            class="q-ml-sm"
+          />
+        </div>
+      </q-form>
     </div>
   </q-page-container>
 </template>
@@ -52,6 +61,8 @@ import { doc, setDoc } from 'firebase/firestore'
 import { ulid } from 'ulid'
 import { useQuasar } from 'quasar'
 import { ethers } from 'ethers'
+import { timeout } from 'workbox-core/_private'
+import { useRouter } from 'vue-router'
 
 const appStore = useAppStore()
 const { auth, db } = useFirebase()
@@ -59,6 +70,7 @@ const { isAuthenticated, user } = useAuth(auth)
 
 const id = ulid()
 const $q = useQuasar()
+const router = useRouter()
 
 if (!isAuthenticated) {
   // TODO redirect to home page
@@ -85,11 +97,22 @@ const removeTeamMember = function (index: number) {
     team.value.members.pop()
   }
 }
-const createTeam = async function () {
+const onSubmit = async function () {
   await setDoc(doc(db, 'teams', id), team.value).then(function () {
     team.value = initialTeamValue
     $q.notify({ type: 'positive', message: 'Team successfully Created' })
+    router.push('/')
   })
+}
+const onReset = async function () {
+  team.value = {
+    uid: id,
+    name: '',
+    description: '',
+    address: '',
+    members: ['', ''],
+    user: user.value?.uid,
+  }
 }
 
 const isAddress = (value: never) => {

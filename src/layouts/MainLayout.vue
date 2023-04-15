@@ -1,14 +1,8 @@
 <template>
   <q-layout view="lHh Lpr lFf">
-    <q-drawer
-      show-if-above
-      :model-value="appStore.getRightDrawerOpen"
-      side="right"
-      bordered
-      @update:modelValue="appStore.toggleDrawer()"
-    >
+    <q-drawer show-if-above :model-value="appStore.getRightDrawerOpen" side="right" bordered @update:modelValue="appStore.toggleDrawer()">
       <!-- drawer content -->
-      <q-item-label header> Essential Links </q-item-label>
+      <q-item-label header> Essential Links</q-item-label>
 
       <q-item v-if="isAuthenticated" clickable tag="a" @click="logout">
         <q-item-section avatar>
@@ -19,13 +13,14 @@
           <q-item-label>Log Out</q-item-label>
         </q-item-section>
       </q-item>
-      <q-item v-if="isAuthenticated" clickable tag="a" @click="logout">
+      <q-item clickable tag="a">
         <q-item-section avatar>
           <q-icon name="wallet" />
         </q-item-section>
 
         <q-item-section>
-          <q-item-label>Connect Your Wallet</q-item-label>
+          <q-item-label v-if="!userAddress" @click="connectWallet">Connect Your Wallet</q-item-label>
+          <q-item-label v-else @click="onCopy(userAddress)">{{ shortAddress(userAddress) }}</q-item-label>
         </q-item-section>
       </q-item>
     </q-drawer>
@@ -40,10 +35,24 @@ import { useFirebase } from 'src/composables/firebase'
 import { useAuth } from '@vueuse/firebase'
 import { signOut } from 'firebase/auth'
 import { useAppStore } from 'src/stores'
+import { useWallet } from 'src/composables/wallet'
+import { shortAddress } from 'src/utils/utilitites'
+import { copyToClipboard } from 'quasar'
 
 const appStore = useAppStore()
 const { auth } = useFirebase()
 const { isAuthenticated } = useAuth(auth)
+const { userAddress, isConnected, connectWallet } = useWallet()
 
 const logout = () => signOut(auth)
+
+const onCopy = (value: string) => {
+  copyToClipboard(value)
+    .then(() => {
+      // success!
+    })
+    .catch(() => {
+      // fail
+    })
+}
 </script>

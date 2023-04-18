@@ -11,13 +11,21 @@
       <p>Members : {{ teamData.members.length }}</p>
       <p>Member list :</p>
       <ul>
-        <li v-for="member in teamData.members" :key="member">{{ member }}</li>
+        <li v-for="member in teamData['members']" :key="member">{{ shortAddress(member) }}</li>
       </ul>
+      <q-btn @click="connectWallet()" v-if="!isConnected">Connect Your wallet</q-btn>
 
-      {{ userAddress }}
-      <q-btn @click="connectWallet()" v-if="!isConnected">Connect Your wallet </q-btn>
-      <q-input outlined v-model="tipsAmount" label="Tips Amount" />
-      <q-btn>Send Tips</q-btn>
+      <q-form @submit="sendTips()" class="q-gutter-md">
+        <q-input
+          outlined
+          v-model="tipsAmount"
+          label="Tips Amount"
+          :rules="[(val) => (val !== null && val !== '') || 'Please type an Amount', (val) => /^-?\d+(\.\d+)?$/.test(val) || 'Please type a real value']"
+        />
+        <div>
+          <q-btn label="Send Tips" type="submit" color="primary" />
+        </div>
+      </q-form>
     </div>
   </q-page-container>
 </template>
@@ -34,6 +42,9 @@ import { deleteDoc, doc } from 'firebase/firestore'
 import { useQuasar } from 'quasar'
 import { timeout } from 'workbox-core/_private'
 import { Team } from 'src/model/Team'
+import abi from '../utils/CryptoTip.json'
+import { ethers } from 'ethers'
+import { shortAddress } from 'src/utils/utilitites'
 
 const router = useRouter()
 if (!router.currentRoute.value.params.ulid) {
@@ -44,9 +55,13 @@ const $q = useQuasar()
 const appStore = useAppStore()
 const { auth, db } = useFirebase()
 const { isAuthenticated } = useAuth(auth)
-const { userAddress, isConnected, connectWallet } = useWallet()
+const { isConnected, connectWallet } = useWallet()
 
-const tipsAmount = ref()
+// Contract Address & ABI
+const contractAddress = '0x8dF19235ca744C3F0A68d259c9625cB9CE92eE82'
+const contractABI = abi.abi
+
+const tipsAmount = ref('')
 
 const id = router.currentRoute.value.params.ulid
 const teamQuery = computed(() => doc(db, 'teams', id as string))
@@ -58,6 +73,28 @@ const deleteTeam = () => {
   $q.notify({ type: 'negative', message: 'Team Remove Successfully' })
   timeout(3000)
   router.push('/')
+}
+
+const sendTips = async () => {
+  try {
+    const { ethereum } = window
+
+    if (ethereum && teamData.value) {
+      const provider = new ethers.providers.Web3Provider(ethereum, 'any')
+
+      const signer = provider.getSigner()
+      const cryptoTipsContract = new ethers.Contract(contractAddress, contractABI, signer)
+
+      const sendTipsTxn = await cryptoTipsContract.pushTips(teamData.value.members, {
+        value: ethers.utils.parseEther(tipsAmount.value),
+      })
+
+      await sendTipsTxn.wait()
+      console.log('Tips Sent!', sendTipsTxn.hash)
+    }
+  } catch (error) {
+    console.log(error)
+  }
 }
 
 const editTeam = () => {

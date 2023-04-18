@@ -16,6 +16,7 @@
       <q-btn @click="connectWallet()" v-if="!isConnected">Connect Your wallet</q-btn>
 
       <q-form @submit="sendTips()" class="q-gutter-md">
+        <q-toggle :label="value ? 'Send Tips' : 'Push Tips'" v-model="value" color="green" keep-color />
         <q-input
           outlined
           v-model="tipsAmount"
@@ -23,7 +24,7 @@
           :rules="[(val) => (val !== null && val !== '') || 'Please type an Amount', (val) => /^-?\d+(\.\d+)?$/.test(val) || 'Please type a real value']"
         />
         <div>
-          <q-btn label="Send Tips" type="submit" color="primary" />
+          <q-btn :label="value ? 'Send Tips' : 'Push Tips'" type="submit" color="primary" />
         </div>
       </q-form>
     </div>
@@ -56,6 +57,7 @@ const appStore = useAppStore()
 const { auth, db } = useFirebase()
 const { isAuthenticated } = useAuth(auth)
 const { isConnected, connectWallet } = useWallet()
+const value = ref(true)
 
 // Contract Address & ABI
 const contractAddress = '0x8dF19235ca744C3F0A68d259c9625cB9CE92eE82'
@@ -84,13 +86,23 @@ const sendTips = async () => {
 
       const signer = provider.getSigner()
       const cryptoTipsContract = new ethers.Contract(contractAddress, contractABI, signer)
+      if (value.value) {
+        console.log('Will send tips')
+        const sendTipsTxn = await cryptoTipsContract.sendTips(teamData.value.members, {
+          value: ethers.utils.parseEther(tipsAmount.value),
+        })
 
-      const sendTipsTxn = await cryptoTipsContract.pushTips(teamData.value.members, {
-        value: ethers.utils.parseEther(tipsAmount.value),
-      })
+        await sendTipsTxn.wait()
+        console.log('Tips Sent!', sendTipsTxn.hash)
+      } else {
+        console.log('Will Push tips')
+        const sendTipsTxn = await cryptoTipsContract.pushTips(teamData.value.members, {
+          value: ethers.utils.parseEther(tipsAmount.value),
+        })
 
-      await sendTipsTxn.wait()
-      console.log('Tips Sent!', sendTipsTxn.hash)
+        await sendTipsTxn.wait()
+        console.log('Tips Pushed!', sendTipsTxn.hash)
+      }
     }
   } catch (error) {
     console.log(error)

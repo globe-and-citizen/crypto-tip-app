@@ -1,28 +1,9 @@
-import { onMounted, ref } from 'vue'
+import { onBeforeUnmount, onMounted, ref } from 'vue'
 
 export function useWallet() {
   const userAddress = ref()
   const isConnected = ref(false)
-
-  async function update() {
-    try {
-      const { ethereum } = window
-
-      const accounts = await ethereum.request({ method: 'eth_accounts' })
-
-      if (accounts.length > 0) {
-        const account = accounts[0]
-        console.log('Wallet is connected! ' + account)
-        userAddress.value = accounts.pop()
-        isConnected.value = true
-      } else {
-        isConnected.value = false
-        console.log('Make sure MetaMask is connected')
-      }
-    } catch (error) {
-      console.log('Error: ', error)
-    }
-  }
+  let intervalId: ReturnType<typeof setInterval> | null = null
 
   async function connectWallet() {
     try {
@@ -32,7 +13,7 @@ export function useWallet() {
       const { ethereum } = window
 
       if (!ethereum) {
-        console.log('Please install MetaMask')
+        alert('Please install MetaMask to use this feature')
       }
 
       const accounts = await ethereum.request({
@@ -44,6 +25,20 @@ export function useWallet() {
     }
   }
 
-  onMounted(() => update())
+  onMounted(() => {
+    intervalId = setInterval(async () => {
+      if (window.ethereum) {
+        const accounts = await window.ethereum.request({ method: 'eth_accounts' })
+        isConnected.value = accounts.length > 0
+        userAddress.value = accounts.pop()
+      } else {
+        isConnected.value = false
+      }
+    }, 1000)
+  })
+  onBeforeUnmount(() => {
+    if (intervalId) clearInterval(intervalId)
+  })
+
   return { userAddress, isConnected, connectWallet }
 }

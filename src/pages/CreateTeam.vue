@@ -1,50 +1,28 @@
 <template>
-  <AppHeader
-    title="Create New Team"
-    back_link="/"
-    @toggleRightDrawer="appStore.toggleDrawer()"
-  />
+  <AppHeader title="Create New Team" back_link="/" @toggleRightDrawer="appStore.toggleDrawer()" />
   <q-page-container>
     <div class="q-pa-md">
-      <q-form @submit="onSubmit" @reset="onReset" class="q-gutter-md">
+      <q-form @submit="onSubmit()" @reset="onReset" class="q-gutter-md">
         <q-input outlined v-model="team.name" label="Team Name" />
-        <q-input
-          outlined
-          v-model="team.description"
-          type="textarea"
-          label="Description"
-        />
+        <q-input outlined v-model="team.description" type="textarea" label="Description" />
         <q-input
           outlined
           v-for="(m, i) in team.members"
           v-model="team.members[i]"
-          :key="m"
+          :key="i"
           label="Member Address"
-          :rules="[
-            (value) => isAddress(value) || 'You need to add a valid address',
-          ]"
+          :rules="[(value) => isAddress(value) || 'You need to add a valid address']"
         >
           <template v-slot:before>
             <q-icon name="add" color="primary" @click="addTeamMember(i + 1)" />
             <q-icon name="remove" v-if="i !== team.members.length - 1" />
-            <q-icon
-              name="remove"
-              color="red"
-              @click="removeTeamMember(i)"
-              v-if="team.members.length > 1 && i === team.members.length - 1"
-            />
+            <q-icon name="remove" color="red" @click="removeTeamMember(i)" v-if="team.members.length > 1 && i === team.members.length - 1" />
           </template>
         </q-input>
 
         <div>
-          <q-btn label="Add Team" type="submit" color="primary" />
-          <q-btn
-            label="Reset"
-            type="reset"
-            color="primary"
-            flat
-            class="q-ml-sm"
-          />
+          <q-btn label="Add Team" type="submit  " color="primary" />
+          <q-btn label="Reset" type="reset" color="primary" flat class="q-ml-sm" />
         </div>
       </q-form>
     </div>
@@ -61,7 +39,6 @@ import { doc, setDoc } from 'firebase/firestore'
 import { ulid } from 'ulid'
 import { useQuasar } from 'quasar'
 import { ethers } from 'ethers'
-import { timeout } from 'workbox-core/_private'
 import { useRouter } from 'vue-router'
 
 const appStore = useAppStore()
@@ -98,6 +75,7 @@ const removeTeamMember = function (index: number) {
   }
 }
 const onSubmit = async function () {
+  console.log('Submit')
   await setDoc(doc(db, 'teams', id), team.value).then(function () {
     team.value = initialTeamValue
     $q.notify({ type: 'positive', message: 'Team successfully Created' })
@@ -116,7 +94,7 @@ const onReset = async function () {
 }
 
 const isAddress = (value: never) => {
-  return ethers.isAddress(value)
+  return ethers.utils.isAddress(value)
 }
 </script>
 

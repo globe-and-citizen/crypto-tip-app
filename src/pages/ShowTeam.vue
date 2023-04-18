@@ -1,21 +1,23 @@
 <template>
   <AppHeader :title="`Team :  ${teamData ? teamData.name : ''}`" back_link="/" @toggleRightDrawer="appStore.toggleDrawer()" />
   <q-page-container>
-    <div class="q-ml-sm">
+    <div class="q-mx-sm q-px-lg">
       <q-icon name="edit" color="primary" @click="editTeam()" />
       <q-icon name="delete" color="red" @click="deleteTeam()" />
     </div>
-    <div class="q-ml-sm" v-if="teamData">
-      <p>Team : {{ teamData.name }}</p>
-      <p>Description : {{ teamData.description }}</p>
-      <p>Members : {{ teamData.members.length }}</p>
-      <p>Member list :</p>
-      <ul>
-        <li v-for="member in teamData['members']" :key="member">{{ shortAddress(member) }}</li>
-      </ul>
-      <q-btn @click="connectWallet()" v-if="!isConnected">Connect Your wallet</q-btn>
+    <div class="q-mx-sm" v-if="teamData">
+      <div class="q-pa-lg">
+        <p>Team : {{ teamData.name }}</p>
+        <p>Description : {{ teamData.description }}</p>
+        <p>Members : {{ teamData.members.length }}</p>
+        <p>Member list :</p>
+        <ul>
+          <li v-for="member in teamData['members']" :key="member">{{ shortAddress(member) }}</li>
+        </ul>
+        <q-btn @click="connectWallet()" v-if="!isConnected">Connect Your wallet</q-btn>
+      </div>
 
-      <q-form @submit="sendTips()" class="q-gutter-md">
+      <q-form @submit="sendTips()" class="q-gutter-md q-pa-lg" ref="tipsForm">
         <q-toggle :label="value ? 'Send Tips' : 'Push Tips'" v-model="value" color="green" keep-color />
         <q-input
           outlined
@@ -26,6 +28,7 @@
         <div>
           <q-btn :label="value ? 'Send Tips' : 'Push Tips'" type="submit" color="primary" />
         </div>
+        <q-inner-loading :showing="loading" class="shadow-1" />
       </q-form>
     </div>
   </q-page-container>
@@ -68,6 +71,10 @@ const tipsAmount = ref('')
 const id = router.currentRoute.value.params.ulid
 const teamQuery = computed(() => doc(db, 'teams', id as string))
 const teamData = useFirestore(teamQuery, null) as Ref<Team | undefined | null>
+import { QForm } from 'quasar'
+
+const tipsForm = ref<QForm | null>(null)
+const loading = ref(false)
 
 const deleteTeam = () => {
   deleteDoc(doc(db, 'teams', teamData.value?.uid as string))
@@ -78,6 +85,7 @@ const deleteTeam = () => {
 }
 
 const sendTips = async () => {
+  loading.value = true
   try {
     const { ethereum } = window
 
@@ -93,7 +101,8 @@ const sendTips = async () => {
         })
 
         await sendTipsTxn.wait()
-        console.log('Tips Sent!', sendTipsTxn.hash)
+        $q.notify({ type: 'positive', message: 'Tips successfully Sent ' + shortAddress(sendTipsTxn.hash) })
+        reset()
       } else {
         console.log('Will Push tips')
         const sendTipsTxn = await cryptoTipsContract.pushTips(teamData.value.members, {
@@ -101,16 +110,25 @@ const sendTips = async () => {
         })
 
         await sendTipsTxn.wait()
-        console.log('Tips Pushed!', sendTipsTxn.hash)
+        $q.notify({ type: 'positive', message: 'Tips successfully Pushed ' + shortAddress(sendTipsTxn.hash) })
+        reset()
       }
     }
   } catch (error) {
     console.log(error)
+  } finally {
+    loading.value = false
   }
 }
 
 const editTeam = () => {
   router.push('/updateTeam/' + id)
+}
+
+// to reset validations:
+function reset() {
+  tipsAmount.value = '0'
+  tipsForm.value?.resetValidation()
 }
 if (!isAuthenticated) {
   // TODO redirect to home page

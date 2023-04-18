@@ -28,7 +28,9 @@
         <div>
           <q-btn :label="value ? 'Send Tips' : 'Push Tips'" type="submit" color="primary" />
         </div>
-        <q-inner-loading :showing="loading" class="shadow-1" />
+        <q-inner-loading :showing="loading" class="shadow-1">
+          <q-spinner-gears size="50px" color="primary" />
+        </q-inner-loading>
       </q-form>
     </div>
   </q-page-container>

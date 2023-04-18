@@ -2,16 +2,16 @@
   <AppHeader title="Update Team" back_link="/" @toggleRightDrawer="appStore.toggleDrawer()" />
   <q-page-container>
     <div class="q-pa-md" v-if="team">
-      <q-form @submit="onSubmit" class="q-gutter-md">
+      <q-form @submit="onSubmit()" class="q-gutter-md">
         <q-input outlined v-model="team.name" label="Team Name" />
         <q-input outlined v-model="team.description" type="textarea" label="Description" />
         <q-input
           outlined
           v-for="(m, i) in team.members"
           v-model="team.members[i]"
-          :key="m"
+          :key="i"
           label="Member Address"
-          :rules="[(value) => ethers.isAddress(value) || 'You need to add a valid address']"
+          :rules="[(value) => ethers.utils.isAddress(value) || 'You need to add a valid address']"
         >
           <template v-slot:before>
             <q-icon name="add" color="primary" @click="addTeamMember(i + 1)" />
@@ -57,7 +57,6 @@ const team = useFirestore(teamQuery, null) as Ref<Team | undefined | null>
 if (!isAuthenticated) {
   // TODO redirect to home page
 }
-// const team = ref(initialTeamValue)
 
 const addTeamMember = function (index: number) {
   if (team.value) {

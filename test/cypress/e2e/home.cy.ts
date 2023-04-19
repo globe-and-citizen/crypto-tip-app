@@ -4,40 +4,31 @@
 // ** This file is an example of how to write Cypress tests, you can safely delete it **
 
 // This test will pass when run against a clean Quasar project
+import { ethers } from 'ethers'
+
 describe('Landing', () => {
   beforeEach(() => {
+    cy.viewport('iphone-x')
     cy.visit('/')
   })
   it('.should() - assert that <title> is correct', () => {
+    // Create team
     cy.get('.q-page > div > .q-btn').click()
+    cy.get('.q-pa-md > .q-btn').click()
+    cy.get('.q-toolbar__title').contains('Create New Team')
+    cy.get('.q-field__inner > .q-field__control').eq(0).type('Dev Team')
+    cy.get('.q-textarea > .q-field__inner > .q-field__control > .q-field__control-container').type(
+      'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed eget justo tempus, egestas libero vel, pulvinar ' +
+        'lacus. Vestibulum non metus tempus, dictum enim at, finibus justo. Interdum et malesuada fames ac ante ipsum primis' +
+        ' in faucibus. Aenean sodales consequat ultrices. Duis nec elit ultrices, laoreet nulla vitae, aliquam dolor.'
+    )
+    const randomWallet = ethers.Wallet.createRandom()
+    const randomWallet2 = ethers.Wallet.createRandom()
+    cy.get('.q-field__inner > .q-field__control').eq(3).type(randomWallet.address)
+    cy.get('.q-field__inner > .q-field__control').eq(2).type(randomWallet2.address)
+    cy.get('.q-btn--standard').click()
   })
 })
-
-// ** The following code is an example to show you how to write some tests for your home page **
-//
-// describe('Home page tests', () => {
-//   beforeEach(() => {
-//     cy.visit('/');
-//   });
-//   it('has pretty background', () => {
-//     cy.dataCy('landing-wrapper')
-//       .should('have.css', 'background')
-//       .and('match', /(".+(\/img\/background).+\.png)/);
-//   });
-//   it('has pretty logo', () => {
-//     cy.dataCy('landing-wrapper img')
-//       .should('have.class', 'logo-main')
-//       .and('have.attr', 'src')
-//       .and('match', /^(data:image\/svg\+xml).+/);
-//   });
-//   it('has very important information', () => {
-//     cy.dataCy('instruction-wrapper')
-//       .should('contain', 'SETUP INSTRUCTIONS')
-//       .and('contain', 'Configure Authentication')
-//       .and('contain', 'Database Configuration and CRUD operations')
-//       .and('contain', 'Continuous Integration & Continuous Deployment CI/CD');
-//   });
-// });
 
 // Workaround for Cypress AE + TS + Vite
 // See: https://github.com/quasarframework/quasar-testing/issues/262#issuecomment-1154127497

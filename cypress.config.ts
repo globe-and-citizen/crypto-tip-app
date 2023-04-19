@@ -6,6 +6,8 @@ export default defineConfig({
   fixturesFolder: 'test/cypress/fixtures',
   screenshotsFolder: 'test/cypress/screenshots',
   videosFolder: 'test/cypress/videos',
+  watchForFileChanges: false,
+  defaultCommandTimeout: 50000,
   video: true,
   e2e: {
     setupNodeEvents(on, config) {

@@ -1,5 +1,5 @@
 <template>
-  <AppHeader title="Update Team" back_link="/" @toggleRightDrawer="appStore.toggleDrawer()" />
+  <AppHeader title="Update Team" :back_link="'/showTeam/' + router.currentRoute.value.params.ulid" @toggleRightDrawer="appStore.toggleDrawer()" />
   <q-page-container>
     <div class="q-pa-md" v-if="team">
       <q-form @submit="onSubmit()" class="q-gutter-md">

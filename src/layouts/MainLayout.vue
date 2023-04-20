@@ -23,6 +23,16 @@
           <q-item-label v-else @click="onCopy(userAddress)">{{ shortAddress(userAddress) }}</q-item-label>
         </q-item-section>
       </q-item>
+
+      <q-item clickable tag="a">
+        <q-item-section avatar>
+          <q-icon name="wallet" />
+        </q-item-section>
+
+        <q-item-section>
+          <q-item-label>{{ balance }} ETH</q-item-label>
+        </q-item-section>
+      </q-item>
     </q-drawer>
     <q-page-container>
       <router-view />
@@ -37,13 +47,36 @@ import { signOut } from 'firebase/auth'
 import { useAppStore } from 'src/stores'
 import { useWallet } from 'src/composables/wallet'
 import { shortAddress } from 'src/utils/utilitites'
-import { copyToClipboard } from 'quasar'
+import { copyToClipboard, useQuasar } from 'quasar'
+import { ethers } from 'ethers'
+import abi from 'src/utils/CryptoTip.json'
+import { onMounted, ref } from 'vue'
 
+const $q = useQuasar()
 const appStore = useAppStore()
 const { auth } = useFirebase()
 const { isAuthenticated } = useAuth(auth)
-const { userAddress, isConnected, connectWallet } = useWallet()
+const { userAddress, connectWallet } = useWallet()
+const balance = ref('0')
 
+// Contract Address & ABI
+const contractAddress = '0x8dF19235ca744C3F0A68d259c9625cB9CE92eE82'
+const contractABI = abi.abi
+
+onMounted(async () => {
+  try {
+    const { ethereum } = window
+    if (ethereum) {
+      const provider = new ethers.providers.Web3Provider(ethereum, 'any')
+      const signer = provider.getSigner()
+      const cryptoTipsContract = new ethers.Contract(contractAddress, contractABI, signer)
+      const balanceTxn = await cryptoTipsContract.getBalance(signer.getAddress())
+      balance.value = ethers.utils.formatEther(balanceTxn)
+    }
+  } catch (e) {
+    console.log(e)
+  }
+})
 const logout = () => signOut(auth)
 
 const onCopy = (value: string) => {

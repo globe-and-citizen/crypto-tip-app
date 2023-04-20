@@ -33,6 +33,15 @@
           <q-item-label>{{ balance }} ETH</q-item-label>
         </q-item-section>
       </q-item>
+      <q-item clickable tag="a" @click="withdraw()">
+        <q-item-section avatar>
+          <q-icon name="get_app" />
+        </q-item-section>
+
+        <q-item-section>
+          <q-item-label>Withdraw</q-item-label>
+        </q-item-section>
+      </q-item>
     </q-drawer>
     <q-page-container>
       <router-view />
@@ -77,6 +86,23 @@ onMounted(async () => {
     console.log(e)
   }
 })
+
+const withdraw = async () => {
+  try {
+    const { ethereum } = window
+    if (ethereum) {
+      const provider = new ethers.providers.Web3Provider(ethereum, 'any')
+      const signer = provider.getSigner()
+      const cryptoTipsContract = new ethers.Contract(contractAddress, contractABI, signer)
+      const withdrawTxn = await cryptoTipsContract.withdraw()
+      await withdrawTxn.wait()
+      $q.notify({ type: 'positive', message: 'Tips successfully withdraw ' + shortAddress(withdrawTxn.hash) })
+    }
+  } catch (e) {
+    $q.notify({ type: 'negative', message: 'Unable to withdraw ' })
+    console.log(e)
+  }
+}
 const logout = () => signOut(auth)
 
 const onCopy = (value: string) => {

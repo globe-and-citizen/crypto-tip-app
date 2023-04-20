@@ -34,7 +34,7 @@ function goToUrl() {
 }
 </script>
 
-<style>
+<style scoped>
 .clamp {
   display: -webkit-box;
   -webkit-line-clamp: 2;

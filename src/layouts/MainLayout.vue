@@ -43,7 +43,7 @@
         </q-item-section>
       </q-item>
     </q-drawer>
-    <q-page-container>
+    <q-page-container class="row justify-center items-top">
       <router-view />
     </q-page-container>
   </q-layout>

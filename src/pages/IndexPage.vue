@@ -1,14 +1,14 @@
 <template>
   <AppHeader title="Crypto Tips" @toggleRightDrawer="appStore.toggleDrawer()" />
-  <q-page style="max-width: 768px">
+  <q-page style="max-width: 768px; width: 100%">
     <div v-if="isAuthenticated" class="q-pa-md">
       <TeamComponent v-for="team in teams" :key="team.uid" :team="team"></TeamComponent>
       <div class="row justify-center q-pa-xl">
-        <q-btn to="/addTeam"> Add Team </q-btn>
+        <q-btn to="/addTeam" data-cy="add_team"> Add Team </q-btn>
       </div>
     </div>
     <div v-else class="q-pa-xl">
-      <q-btn @click="signIn" icon="google"> Sign In with Google </q-btn>
+      <q-btn @click="signIn" icon="google" data-cy="sign_in"> Sign In with Google </q-btn>
     </div>
   </q-page>
 </template>

@@ -1,37 +1,39 @@
 <template>
   <AppHeader :title="`Team :  ${teamData ? teamData.name : ''}`" back_link="/" @toggleRightDrawer="appStore.toggleDrawer()" />
-  <q-page-container style="padding-top: 10px">
-    <div class="q-mx-sm q-px-lg row justify-between items-center">
-      <q-btn @click="editTeam()" icon="edit" label="Edit Team" flat color="primary" />
-      <q-btn @click="deleteTeam()" icon="delete" label="Delete Team" flat color="red" />
-    </div>
-    <div class="q-mx-sm" v-if="teamData">
-      <div class="q-pa-lg q-pt-sm">
-        <h2 class="q-my-none text-h4 text-bold clamp">{{ teamData.name }}</h2>
-        <p>Description : {{ teamData.description }}</p>
-        <p>Members : {{ teamData.members.length }}</p>
-        <p>Member list :</p>
-        <ul>
-          <li v-for="member in teamData['members']" :key="member">{{ shortAddress(member) }}</li>
-        </ul>
-        <q-btn @click="connectWallet()" v-if="!isConnected">Connect Your wallet</q-btn>
+  <q-page-container style="padding: 0; padding-top: 10px" class="row justify-center items-top">
+    <div style="max-width: 768px">
+      <div class="q-mx-sm q-px-lg row justify-between items-center">
+        <q-btn @click="editTeam()" icon="edit" label="Edit Team" flat color="primary" />
+        <q-btn @click="deleteTeam()" icon="delete" label="Delete Team" flat color="red" />
       </div>
-
-      <q-form @submit="sendTips()" class="q-gutter-md q-pa-lg" ref="tipsForm">
-        <q-toggle :label="value ? 'Send Tips' : 'Push Tips'" v-model="value" color="green" keep-color />
-        <q-input
-          outlined
-          v-model="tipsAmount"
-          label="Tips Amount"
-          :rules="[(val) => (val !== null && val !== '') || 'Please type an Amount', (val) => /^-?\d+(\.\d+)?$/.test(val) || 'Please type a real value']"
-        />
-        <div>
-          <q-btn :label="value ? 'Send Tips' : 'Push Tips'" type="submit" color="primary" />
+      <div class="q-mx-sm" v-if="teamData">
+        <div class="q-pa-lg q-pt-sm">
+          <h2 class="q-my-none text-h4 text-bold clamp">{{ teamData.name }}</h2>
+          <p>Description : {{ teamData.description }}</p>
+          <p>Members : {{ teamData.members.length }}</p>
+          <p>Member list :</p>
+          <ul>
+            <li v-for="member in teamData['members']" :key="member">{{ shortAddress(member) }}</li>
+          </ul>
+          <q-btn @click="connectWallet()" v-if="!isConnected">Connect Your wallet</q-btn>
         </div>
-        <q-inner-loading :showing="loading" class="shadow-1">
-          <q-spinner-gears size="50px" color="primary" />
-        </q-inner-loading>
-      </q-form>
+
+        <q-form @submit="sendTips()" class="q-gutter-md q-pa-lg" ref="tipsForm">
+          <q-toggle :label="value ? 'Send Tips' : 'Push Tips'" v-model="value" color="green" keep-color />
+          <q-input
+            outlined
+            v-model="tipsAmount"
+            label="Tips Amount"
+            :rules="[(val) => (val !== null && val !== '') || 'Please type an Amount', (val) => /^-?\d+(\.\d+)?$/.test(val) || 'Please type a real value']"
+          />
+          <div>
+            <q-btn :label="value ? 'Send Tips' : 'Push Tips'" type="submit" color="primary" />
+          </div>
+          <q-inner-loading :showing="loading" class="shadow-1">
+            <q-spinner-gears size="50px" color="primary" />
+          </q-inner-loading>
+        </q-form>
+      </div>
     </div>
   </q-page-container>
 </template>

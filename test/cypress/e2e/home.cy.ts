@@ -11,7 +11,20 @@ describe('Landing', () => {
     cy.viewport('iphone-x')
     cy.visit('/')
   })
-  it('.should() - assert that <title> is correct', () => {
+  it('should navigate between page', () => {
+    // Login
+    cy.dataCy('sign_in').click()
+
+    // Click on add team button
+    cy.dataCy('add_team').click()
+
+    // Check we are on create team page
+    cy.get('input')
+    cy.get('.q-toolbar__title').contains('Create New Team')
+    cy.get('a.q-btn > .q-btn__content > .q-icon').click()
+    cy.get('.q-toolbar__title').contains('Crypto Tips')
+  })
+  it('Should create Dev Team', () => {
     // Create team
     cy.get('.q-page > div > .q-btn').click()
     cy.get('.q-pa-md > .q-btn').click()
@@ -28,7 +41,7 @@ describe('Landing', () => {
     cy.get('.q-field__inner > .q-field__control').eq(2).type(randomWallet2.address)
     cy.get('.q-btn--standard').click()
   })
-  it.only('Test Create Writer team', () => {
+  it('Test Create Writer team', () => {
     cy.get('.q-pa-md > .q-btn').click()
     cy.get('.q-toolbar__title').contains('Create New Team')
 

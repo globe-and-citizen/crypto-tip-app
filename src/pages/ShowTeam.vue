@@ -1,13 +1,13 @@
 <template>
   <AppHeader :title="`Team :  ${teamData ? teamData.name : ''}`" back_link="/" @toggleRightDrawer="appStore.toggleDrawer()" />
-  <q-page-container>
-    <div class="q-mx-sm q-px-lg">
-      <q-icon name="edit" color="primary" @click="editTeam()" />
-      <q-icon name="delete" color="red" @click="deleteTeam()" />
+  <q-page style="padding: 10px 0 0; max-width: 768px">
+    <div class="q-mx-sm q-px-lg row justify-between items-center">
+      <q-btn @click="editTeam()" icon="edit" label="Edit Team" flat color="primary" />
+      <q-btn @click="deleteTeam()" icon="delete" label="Delete Team" flat color="red" />
     </div>
     <div class="q-mx-sm" v-if="teamData">
-      <div class="q-pa-lg">
-        <p>Team : {{ teamData.name }}</p>
+      <div class="q-pa-lg q-pt-sm">
+        <h2 class="q-my-none text-h4 text-bold clamp">{{ teamData.name }}</h2>
         <p>Description : {{ teamData.description }}</p>
         <p>Members : {{ teamData.members.length }}</p>
         <p>Member list :</p>
@@ -33,7 +33,7 @@
         </q-inner-loading>
       </q-form>
     </div>
-  </q-page-container>
+  </q-page>
 </template>
 
 <script setup lang="ts">
@@ -132,9 +132,17 @@ function reset() {
   tipsAmount.value = '0'
   tipsForm.value?.resetValidation()
 }
+
 if (!isAuthenticated) {
   // TODO redirect to home page
 }
 </script>
 
-<style scoped></style>
+<style scoped>
+.clamp {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+</style>

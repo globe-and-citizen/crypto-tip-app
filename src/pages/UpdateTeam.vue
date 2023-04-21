@@ -1,6 +1,6 @@
 <template>
-  <AppHeader title="Update Team" back_link="/" @toggleRightDrawer="appStore.toggleDrawer()" />
-  <q-page-container>
+  <AppHeader title="Update Team" :back_link="'/showTeam/' + router.currentRoute.value.params.ulid" @toggleRightDrawer="appStore.toggleDrawer()" />
+  <q-page style="max-width: 768px" class="full-width">
     <div class="q-pa-md" v-if="team">
       <q-form @submit="onSubmit()" class="q-gutter-md">
         <q-input outlined v-model="team.name" label="Team Name" />
@@ -25,7 +25,7 @@
         </div>
       </q-form>
     </div>
-  </q-page-container>
+  </q-page>
 </template>
 
 <script setup lang="ts">

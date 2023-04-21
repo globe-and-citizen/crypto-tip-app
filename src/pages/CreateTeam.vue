@@ -1,6 +1,6 @@
 <template>
   <AppHeader title="Create New Team" back_link="/" @toggleRightDrawer="appStore.toggleDrawer()" />
-  <q-page-container>
+  <q-page style="max-width: 768px" class="full-width">
     <div class="q-pa-md">
       <q-form @submit="onSubmit()" @reset="onReset" class="q-gutter-md">
         <q-input outlined v-model="team.name" label="Team Name" />
@@ -26,7 +26,7 @@
         </div>
       </q-form>
     </div>
-  </q-page-container>
+  </q-page>
 </template>
 
 <script setup lang="ts">

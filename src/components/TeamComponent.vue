@@ -1,7 +1,7 @@
 <template>
   <article class="q-pt-md q-px-sm-xs relative-position row" @click="goToUrl()">
-    <q-skeleton class="col-4" square style="aspect-ratio: 1; border-radius: 24px" />
-    <div class="col-8">
+    <q-btn round size="xl" label="DT" style="width: 120px; height: 120px" class="q-mr-md" />
+    <div class="col">
       <div class="q-ml-sm">
         <h2 class="q-mb-none text-body1 text-bold">{{ team.name }}</h2>
         <p class="clamp">{{ team.description }}</p>
@@ -34,7 +34,7 @@ function goToUrl() {
 }
 </script>
 
-<style>
+<style scoped>
 .clamp {
   display: -webkit-box;
   -webkit-line-clamp: 2;

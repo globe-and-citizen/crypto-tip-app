@@ -1,7 +1,7 @@
 <template>
   <AppHeader title="Crypto Tips" @toggleRightDrawer="appStore.toggleDrawer()" />
-  <q-page class="row justify-center items-top">
-    <div v-if="isAuthenticated" class="q-pa-md" style="max-width: 768px">
+  <q-page style="max-width: 768px">
+    <div v-if="isAuthenticated" class="q-pa-md">
       <TeamComponent v-for="team in teams" :key="team.uid" :team="team"></TeamComponent>
       <div class="row justify-center q-pa-xl">
         <q-btn to="/addTeam"> Add Team </q-btn>

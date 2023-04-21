@@ -1,6 +1,6 @@
 <template>
   <AppHeader :title="`Team :  ${teamData ? teamData.name : ''}`" back_link="/" @toggleRightDrawer="appStore.toggleDrawer()" />
-  <q-page style="padding: 10px 0 0; max-width: 768px">
+  <q-page style="padding: 10px 0 0; max-width: 768px" class="full-width">
     <div class="q-mx-sm q-px-lg row justify-between items-center">
       <q-btn @click="editTeam()" icon="edit" label="Edit Team" flat color="primary" />
       <q-btn @click="deleteTeam()" icon="delete" label="Delete Team" flat color="red" />

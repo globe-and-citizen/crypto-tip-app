@@ -2,14 +2,13 @@ import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { ethers } from 'ethers'
 
 export function useWallet() {
-  const web3_network = import.meta.env.WEB3_NETWORK ? import.meta.env.WEB3_NETWORK : 'any'
+  const web3_network = import.meta.env.VITE_WEB3_NETWORK ? import.meta.env.VITE_WEB3_NETWORK : 'any'
 
   const userAddress = ref()
   const isConnected = ref(false)
   let intervalId: ReturnType<typeof setInterval> | null = null
   const provider = ref()
   const signer = ref()
-
   async function connectWallet() {
     try {
       if (typeof window.ethereum !== 'undefined') {

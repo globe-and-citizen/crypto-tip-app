@@ -5,11 +5,12 @@ import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { ethers } from 'ethers'
 
 export function useCryptoTips() {
-  const contractAddress = import.meta.env.WEB3_GOERLI_CONTRACT_ADDRESS
+  const contractAddress = import.meta.env.VITE_WEB3_GOERLI_CONTRACT_ADDRESS
   const contractABI = abi.abi
   const { provider, signer } = useWallet()
   const cryptoTipsContract = ref()
   const balance = ref('0')
+  const error = ref()
 
   let intervalId: ReturnType<typeof setInterval> | null = null
 
@@ -66,22 +67,29 @@ export function useCryptoTips() {
   }
 
   onMounted(async () => {
-    if (provider.value && signer.value) {
-      cryptoTipsContract.value = new ethers.Contract(contractAddress, contractABI, signer.value)
-      await loadBalance()
+    if (!contractAddress) {
+      error.value = new Error('You nee a valid contract address')
+    } else {
+      intervalId = setInterval(async () => {
+        if (provider.value && signer.value && contractAddress) {
+          if (!cryptoTipsContract.value) {
+            try {
+              cryptoTipsContract.value = new ethers.Contract(contractAddress, contractABI, signer.value)
+              await loadBalance()
+            } catch (e) {
+              error.value = e
+            }
+          }
+        } else {
+          cryptoTipsContract.value = null
+        }
+      }, 3000)
     }
-
     // Find a way to reload balance only after withdraw
-    intervalId = setInterval(async () => {
-      if (provider.value) {
-      } else {
-        // isConnected.value = false
-      }
-    }, 1000)
   })
   onBeforeUnmount(() => {
     if (intervalId) clearInterval(intervalId)
   })
 
-  return { cryptoTipsContract, balance, withdraw, getBalance }
+  return { cryptoTipsContract, balance, withdraw, getBalance, error }
 }

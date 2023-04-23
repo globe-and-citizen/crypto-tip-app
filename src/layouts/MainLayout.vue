@@ -71,12 +71,13 @@ const balance = ref('0')
 // Contract Address & ABI
 const contractAddress = '0x8dF19235ca744C3F0A68d259c9625cB9CE92eE82'
 const contractABI = abi.abi
+const web3_network = import.meta.env.WEB3_NETWORK ? import.meta.env.WEB3_NETWORK : 'any'
 
 onMounted(async () => {
   try {
     const { ethereum } = window
     if (ethereum) {
-      const provider = new ethers.providers.Web3Provider(ethereum, 'any')
+      const provider = new ethers.providers.Web3Provider(ethereum, web3_network)
       const signer = provider.getSigner()
       const cryptoTipsContract = new ethers.Contract(contractAddress, contractABI, signer)
       const balanceTxn = await cryptoTipsContract.getBalance(signer.getAddress())
@@ -91,7 +92,7 @@ const withdraw = async () => {
   try {
     const { ethereum } = window
     if (ethereum) {
-      const provider = new ethers.providers.Web3Provider(ethereum, 'any')
+      const provider = new ethers.providers.Web3Provider(ethereum, web3_network)
       const signer = provider.getSigner()
       const cryptoTipsContract = new ethers.Contract(contractAddress, contractABI, signer)
       const withdrawTxn = await cryptoTipsContract.withdraw()

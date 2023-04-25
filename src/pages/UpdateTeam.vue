@@ -11,12 +11,13 @@
           v-model="team.members[i]"
           :key="i"
           label="Member Address"
+          lazy-rules
           :rules="[(value) => ethers.utils.isAddress(value) || 'You need to add a valid address']"
         >
           <template v-slot:before>
             <q-icon name="add" color="primary" @click="addTeamMember(i + 1)" />
             <q-icon name="remove" v-if="i !== team.members.length - 1" />
-            <q-icon name="remove" color="red" @click="removeTeamMember(i)" v-if="team.members.length > 1 && i === team.members.length - 1" />
+            <q-icon name="remove" color="red" @click="removeTeamMember(i)" v-if="team.members.length > 1" />
           </template>
         </q-input>
 
@@ -66,12 +67,7 @@ const addTeamMember = function (index: number) {
 
 const removeTeamMember = function (index: number) {
   if (team.value) {
-    if (index != -1 && index !== team.value.members.length - 1) {
-      team.value.members.slice(index, 2)
-    }
-    if (index === team.value.members.length - 1) {
-      team.value.members.pop()
-    }
+    team.value.members.splice(index, 1)
   }
 }
 const onSubmit = async function () {

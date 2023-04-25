@@ -1,6 +1,6 @@
 <template>
   <AppHeader :title="`Team :  ${teamData ? teamData.name : ''}`" back_link="/" @toggleRightDrawer="appStore.toggleDrawer()" />
-  <q-page style="padding: 10px 0 0; max-width: 768px">
+  <q-page style="padding: 10px 0 0; max-width: 768px" class="full-width">
     <div class="q-mx-sm q-px-lg row justify-between items-center">
       <q-btn @click="editTeam()" icon="edit" label="Edit Team" flat color="primary" />
       <q-btn @click="deleteTeam()" icon="delete" label="Delete Team" flat color="red" />
@@ -78,6 +78,7 @@ import { QForm } from 'quasar'
 const tipsForm = ref<QForm | null>(null)
 const loading = ref(false)
 
+const web3_network = import.meta.env.WEB3_NETWORK ? import.meta.env.WEB3_NETWORK : 'any'
 const deleteTeam = () => {
   deleteDoc(doc(db, 'teams', teamData.value?.uid as string))
 
@@ -92,7 +93,7 @@ const sendTips = async () => {
     const { ethereum } = window
 
     if (ethereum && teamData.value) {
-      const provider = new ethers.providers.Web3Provider(ethereum, 'any')
+      const provider = new ethers.providers.Web3Provider(ethereum, web3_network)
 
       const signer = provider.getSigner()
       const cryptoTipsContract = new ethers.Contract(contractAddress, contractABI, signer)

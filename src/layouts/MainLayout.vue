@@ -24,7 +24,7 @@
         </q-item-section>
       </q-item>
 
-      <q-item clickable tag="a">
+      <q-item clickable tag="a" v-if="userAddress">
         <q-item-section avatar>
           <q-icon name="wallet" />
         </q-item-section>
@@ -33,7 +33,7 @@
           <q-item-label>{{ balance }} ETH</q-item-label>
         </q-item-section>
       </q-item>
-      <q-item clickable tag="a" @click="withdraw()">
+      <q-item clickable tag="a" v-if="userAddress" @click="withdraw()">
         <q-item-section avatar>
           <q-icon name="get_app" />
         </q-item-section>

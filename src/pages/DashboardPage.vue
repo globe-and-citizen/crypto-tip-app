@@ -3,9 +3,10 @@
   <q-page style="max-width: 768px; width: 100%" class="q-pa-md">
     <h1 class="text-h3">Dashboard</h1>
     <div class="row" style="gap: 50px">
-      <div class="col-12 col-sm" style="border: solid gray 1px; border-radius: 15px">
-        <h1 class="text-h5 text-center">Transactions</h1>
-        <ul>
+      <div class="col-12 col-sm column items-center" style="border: solid gray 1px; border-radius: 15px">
+        <h1 class="text-h5">Transactions</h1>
+        <q-skeleton class="q-mb-lg" type="rect" width="80%" v-if="true" height="150px" />
+        <ul v-else>
           <li>ds</li>
           <li>ds</li>
           <li>ds</li>
@@ -13,13 +14,15 @@
         </ul>
       </div>
       <div class="col column" style="gap: 50px">
-        <div style="border: solid gray 1px; border-radius: 15px">
-          <h1 class="text-h5 text-center">My Balance</h1>
-          <p class="text-h5 text-center text-bold">0.50 Ether</p>
+        <div style="border: solid gray 1px; border-radius: 15px" class="column items-center">
+          <h2 class="text-h5">My Balance</h2>
+          <q-skeleton class="q-mb-lg" type="rect" width="80%" v-if="false" />
+          <p class="text-h5 text-bold" v-else>0.50 Ether</p>
         </div>
-        <div style="border: solid gray 1px; border-radius: 15px">
-          <h1 class="text-h5 text-center">Contract Balance</h1>
-          <p class="text-h5 text-center text-bold">2.63 Ether</p>
+        <div style="border: solid gray 1px; border-radius: 15px" class="column items-center">
+          <h2 class="text-h5">Contract Balance</h2>
+          <q-skeleton class="q-mb-lg" type="rect" width="80%" v-if="true" />
+          <p class="text-h5 text-bold" v-else>2.63 Ether</p>
         </div>
       </div>
     </div>

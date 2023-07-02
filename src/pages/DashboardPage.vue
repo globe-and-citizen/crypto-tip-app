@@ -11,13 +11,13 @@
     <div class="row" style="gap: 50px">
       <div class="col-12 col-sm column items-center" style="border: solid gray 1px; border-radius: 15px">
         <h1 class="text-h5">Transactions</h1>
-        <q-skeleton class="q-mb-lg" type="rect" width="80%" v-if="!isConnected" height="150px" />
-        <ul v-else>
+        <ul v-if="isConnected && transactions">
           <li>ds</li>
           <li>ds</li>
           <li>ds</li>
           <li>ds</li>
         </ul>
+        <q-skeleton class="q-mb-lg" type="rect" width="80%" v-else height="150px" />
       </div>
       <div class="col column" style="gap: 50px">
         <div style="border: solid gray 1px; border-radius: 15px" class="column items-center">
@@ -42,6 +42,9 @@ import { useWallet } from 'src/composables/wallet'
 import { ref, watchEffect } from 'vue'
 import { ethers } from 'ethers'
 import abi from 'src/utils/CryptoTip.json'
+import { useAuth, useFirestore } from '@vueuse/firebase'
+import { collection } from 'firebase/firestore'
+import { useFirebase } from 'src/composables/firebase'
 
 const appStore = useAppStore()
 
@@ -54,6 +57,11 @@ const web3_network = import.meta.env.WEB3_NETWORK ? import.meta.env.WEB3_NETWORK
 
 const walletBalance = ref()
 const contractBalance = ref()
+
+const { auth, db } = useFirebase()
+const { isAuthenticated, user } = useAuth(auth)
+
+const transactions = useFirestore(collection(db, 'user', user.value ? user.value.uid : '', 'transactions'))
 watchEffect(async () => {
   if (isConnected) {
     try {

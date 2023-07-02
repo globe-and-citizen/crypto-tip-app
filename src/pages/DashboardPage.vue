@@ -2,10 +2,16 @@
   <AppHeader title="Crypto Tips" @toggleRightDrawer="appStore.toggleDrawer()" />
   <q-page style="max-width: 768px; width: 100%" class="q-pa-md">
     <h1 class="text-h3">Dashboard</h1>
+    <div v-if="!isConnected">
+      <p>Connect Your wallet to access your data</p>
+      <q-btn @click="connectWallet" icon="wallet" data-cy="sign_in" class="q-mb-lg">
+        <div class="q-px-sm">Connect Your wallet</div>
+      </q-btn>
+    </div>
     <div class="row" style="gap: 50px">
       <div class="col-12 col-sm column items-center" style="border: solid gray 1px; border-radius: 15px">
         <h1 class="text-h5">Transactions</h1>
-        <q-skeleton class="q-mb-lg" type="rect" width="80%" v-if="true" height="150px" />
+        <q-skeleton class="q-mb-lg" type="rect" width="80%" v-if="!isConnected" height="150px" />
         <ul v-else>
           <li>ds</li>
           <li>ds</li>
@@ -16,13 +22,13 @@
       <div class="col column" style="gap: 50px">
         <div style="border: solid gray 1px; border-radius: 15px" class="column items-center">
           <h2 class="text-h5">My Balance</h2>
-          <q-skeleton class="q-mb-lg" type="rect" width="80%" v-if="false" />
-          <p class="text-h5 text-bold" v-else>0.50 Ether</p>
+          <p class="text-h5 text-bold" v-if="isConnected && walletBalance">{{ walletBalance }} Ether</p>
+          <q-skeleton class="q-mb-lg" type="rect" width="80%" v-else />
         </div>
         <div style="border: solid gray 1px; border-radius: 15px" class="column items-center">
           <h2 class="text-h5">Contract Balance</h2>
-          <q-skeleton class="q-mb-lg" type="rect" width="80%" v-if="true" />
-          <p class="text-h5 text-bold" v-else>2.63 Ether</p>
+          <p class="text-h5 text-bold" v-if="contractBalance && isConnected">{{ contractBalance }} Ether</p>
+          <q-skeleton class="q-mb-lg" type="rect" width="80%" v-else />
         </div>
       </div>
     </div>
@@ -30,40 +36,39 @@
 </template>
 
 <script setup lang="ts">
-import { useFirebase } from 'src/composables/firebase'
-import { useFirestore, useAuth } from '@vueuse/firebase'
-import { doc, setDoc, collection, where, query } from 'firebase/firestore'
-import { GoogleAuthProvider, signInWithPopup, signInAnonymously, getAdditionalUserInfo } from 'firebase/auth'
-import { computed } from 'vue'
 import AppHeader from 'components/AppHeader.vue'
 import { useAppStore } from 'src/stores'
-import TeamComponent from 'components/TeamComponent.vue'
+import { useWallet } from 'src/composables/wallet'
+import { ref, watchEffect } from 'vue'
+import { ethers } from 'ethers'
+import abi from 'src/utils/CryptoTip.json'
 
 const appStore = useAppStore()
 
-const { auth, db } = useFirebase()
-const { isAuthenticated, user } = useAuth(auth)
-const signIn = () => {
-  if (import.meta.env.VITE_MODE == 'test') {
-    signInAnonymously(auth).then(async (result) => {
-      const isNewUser = getAdditionalUserInfo(result)?.isNewUser
-      const { uid } = result.user
-      if (isNewUser) {
-        await setDoc(doc(db, 'users', uid), { email: '', displayName: '', photoURL: '' })
+const { isConnected, connectWallet } = useWallet()
+
+// Contract Address & ABI
+const contractAddress = '0x8dF19235ca744C3F0A68d259c9625cB9CE92eE82'
+const contractABI = abi.abi
+const web3_network = import.meta.env.WEB3_NETWORK ? import.meta.env.WEB3_NETWORK : 'any'
+
+const walletBalance = ref()
+const contractBalance = ref()
+watchEffect(async () => {
+  if (isConnected) {
+    try {
+      const { ethereum } = window
+      if (ethereum) {
+        const provider = new ethers.providers.Web3Provider(ethereum, web3_network)
+        const signer = provider.getSigner()
+        const cryptoTipsContract = new ethers.Contract(contractAddress, contractABI, signer)
+        const balanceTxn = await cryptoTipsContract.getBalance(signer.getAddress())
+        contractBalance.value = ethers.utils.formatEther(balanceTxn)
+        walletBalance.value = ethers.utils.formatEther(await signer.getBalance())
       }
-    })
-  } else {
-    signInWithPopup(auth, new GoogleAuthProvider()).then(async (result) => {
-      const isNewUser = getAdditionalUserInfo(result)?.isNewUser
-      const { email, displayName, photoURL, uid } = result.user
-      if (isNewUser) {
-        await setDoc(doc(db, 'users', uid), { email, displayName, photoURL })
-      }
-    })
+    } catch (e) {
+      console.log(e)
+    }
   }
-}
-
-const teamsQuery = computed(() => query(collection(db, 'teams'), where('user', '==', user.value ? user.value.uid : '')))
-
-const teams = useFirestore(teamsQuery, undefined, { autoDispose: false })
+})
 </script>

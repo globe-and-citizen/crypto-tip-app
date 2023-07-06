@@ -2,7 +2,27 @@
   <q-layout view="lHh Lpr lFf">
     <q-drawer show-if-above :model-value="appStore.getRightDrawerOpen" side="right" bordered @update:modelValue="appStore.toggleDrawer()">
       <!-- drawer content -->
-      <q-item-label header> Essential Links</q-item-label>
+      <q-item-label header> Navigation</q-item-label>
+      <q-item v-if="route.fullPath == '/'" clickable tag="a" to="/dashboard">
+        <q-item-section avatar>
+          <q-icon name="sync_alt" />
+        </q-item-section>
+
+        <q-item-section>
+          <q-item-label>DashBoard</q-item-label>
+        </q-item-section>
+      </q-item>
+      <q-item v-else clickable tag="a" to="/">
+        <q-item-section avatar>
+          <q-icon name="sync_alt" />
+        </q-item-section>
+
+        <q-item-section>
+          <q-item-label>Home Page</q-item-label>
+        </q-item-section>
+      </q-item>
+      <!-- drawer content -->
+      <q-item-label header> Essential Action</q-item-label>
 
       <q-item v-if="isAuthenticated" clickable tag="a" @click="logout">
         <q-item-section avatar>
@@ -60,7 +80,9 @@ import { copyToClipboard, useQuasar } from 'quasar'
 import { ethers } from 'ethers'
 import abi from 'src/utils/CryptoTip.json'
 import { onMounted, ref } from 'vue'
+import { useRoute } from 'vue-router'
 
+const route = useRoute()
 const $q = useQuasar()
 const appStore = useAppStore()
 const { auth } = useFirebase()

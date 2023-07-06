@@ -9,7 +9,7 @@ export function useCryptoTips() {
   const contractABI = abi.abi
   const { provider, signer } = useWallet()
   const cryptoTipsContract = ref()
-  const balance = ref('0')
+  const balance = ref()
   const error = ref()
 
   let intervalId: ReturnType<typeof setInterval> | null = null
@@ -19,14 +19,25 @@ export function useCryptoTips() {
    * @param address
    */
   const getBalance = async (address?: string) => {
-    let balance = '0'
+    // console.log('here')
+    let balance
     let error
-    if (provider.value && cryptoTipsContract.value) {
-      if (address && ethers.utils.isAddress(address)) {
+    if (provider.value && signer.value && cryptoTipsContract.value) {
+      let currentAddress = await signer.value?.getAddress()
+      // console.log('level 1')
+      // console.log('address', currentAddress)
+      if (address) {
+        currentAddress = address
+      }
+      if (currentAddress && ethers.utils.isAddress(currentAddress)) {
+        // console.log('level 2')
         try {
-          const balanceTxn = await cryptoTipsContract.value.getBalance(signer.value.getAddress())
+          const balanceTxn = await cryptoTipsContract.value.getBalance(currentAddress)
+          // console.log('balanceTxn', balanceTxn)
           balance = ethers.utils.formatEther(balanceTxn)
+          // console.log('balance', balance)
         } catch (e) {
+          // console.log('error', e)
           error = e
         }
       }

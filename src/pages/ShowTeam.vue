@@ -44,7 +44,7 @@ import { useWallet } from 'src/composables/wallet'
 import { useAuth, useFirestore } from '@vueuse/firebase'
 import { useRouter } from 'vue-router'
 import { computed, ref, Ref } from 'vue'
-import { deleteDoc, doc } from 'firebase/firestore'
+import { deleteDoc, doc, setDoc } from 'firebase/firestore'
 import { useQuasar } from 'quasar'
 import { timeout } from 'workbox-core/_private'
 import { Team } from 'src/model/Team'
@@ -60,10 +60,13 @@ if (!router.currentRoute.value.params.ulid) {
 const $q = useQuasar()
 const appStore = useAppStore()
 const { auth, db } = useFirebase()
-const { isAuthenticated } = useAuth(auth)
+const { isAuthenticated, user } = useAuth(auth)
 const { isConnected, connectWallet } = useWallet()
 const value = ref(true)
 
+if (!isAuthenticated) {
+  router.push('/')
+}
 // Contract Address & ABI
 const contractAddress = '0x8dF19235ca744C3F0A68d259c9625cB9CE92eE82'
 const contractABI = abi.abi
@@ -104,7 +107,20 @@ const sendTips = async () => {
         })
 
         await sendTipsTxn.wait()
+        // Create the transaction in firebase
+        const transaction = {
+          hash: sendTipsTxn.hash,
+          type: 'sendTips',
+          senderAddress: await signer.getAddress(),
+          members: teamData.value.members,
+          value: tipsAmount.value,
+        }
+
         $q.notify({ type: 'positive', message: 'Tips successfully Sent ' + shortAddress(sendTipsTxn.hash) })
+        if (user.value)
+          await setDoc(doc(db, 'users', user.value.uid, 'transactions', sendTipsTxn.hash), transaction).then(function () {
+            $q.notify({ type: 'positive', message: 'Tips successfully Saved' })
+          })
         reset()
       } else {
         console.log('Will Push tips')
@@ -113,7 +129,21 @@ const sendTips = async () => {
         })
 
         await sendTipsTxn.wait()
+
+        // Create the transaction in firebase
+        const transaction = {
+          hash: sendTipsTxn.hash,
+          type: 'sendTips',
+          senderAddress: await signer.getAddress(),
+          members: teamData.value.members,
+          value: tipsAmount.value,
+        }
+        // Create the transaction in firebase
         $q.notify({ type: 'positive', message: 'Tips successfully Pushed ' + shortAddress(sendTipsTxn.hash) })
+        if (user.value)
+          await setDoc(doc(db, 'users', user.value.uid, 'transactions', sendTipsTxn.hash), transaction).then(function () {
+            $q.notify({ type: 'positive', message: 'Tips successfully Saved' })
+          })
         reset()
       }
     }

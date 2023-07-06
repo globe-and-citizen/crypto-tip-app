@@ -40,11 +40,9 @@ import abi from 'src/utils/CryptoTip.json'
 import { useAuth, useFirestore } from '@vueuse/firebase'
 import { collection } from 'firebase/firestore'
 import { useFirebase } from 'src/composables/firebase'
-import { useRouter } from 'vue-router'
 import { shortAddress } from 'src/utils/utilitites'
 
 const appStore = useAppStore()
-const router = useRouter()
 
 const { isConnected, connectWallet } = useWallet()
 
@@ -57,12 +55,7 @@ const walletBalance = ref()
 const contractBalance = ref()
 
 const { auth, db } = useFirebase()
-const { isAuthenticated, user } = useAuth(auth)
-// setTimeout(() => {
-//   if (!user.value) {
-//     router.push('/')
-//   }
-// }, 10000)
+const { user } = useAuth(auth)
 const userQuery = computed(() => user.value?.uid && collection(db, 'users', user.value?.uid, 'transactions'))
 const transactions = useFirestore(userQuery, undefined)
 

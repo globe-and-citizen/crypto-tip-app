@@ -22,12 +22,12 @@
       <div class="col column" style="gap: 50px">
         <div style="border: solid gray 1px; border-radius: 15px" class="column items-center">
           <h2 class="text-h5">My Balance</h2>
-          <p class="text-h5 text-bold" v-if="isConnected && walletBalance">{{ walletBalance }} Ether</p>
+          <p class="text-h5 text-bold" v-if="isConnected && walletBalance">{{ walletBalance.toString().substring(0, 5) }} Ether</p>
           <q-skeleton class="q-mb-lg" type="rect" width="80%" v-else />
         </div>
         <div style="border: solid gray 1px; border-radius: 15px" class="column items-center">
           <h2 class="text-h5">Contract Balance</h2>
-          <p class="text-h5 text-bold" v-if="contractBalance && isConnected">{{ contractBalance }} Ether</p>
+          <p class="text-h5 text-bold" v-if="contractBalance && isConnected">{{ contractBalance.toString().substring(0, 5) }} Ether</p>
           <q-skeleton class="q-mb-lg" type="rect" width="80%" v-else />
         </div>
       </div>
@@ -39,14 +39,16 @@
 import AppHeader from 'components/AppHeader.vue'
 import { useAppStore } from 'src/stores'
 import { useWallet } from 'src/composables/wallet'
-import { ref, watchEffect } from 'vue'
+import { computed, ref, watchEffect } from 'vue'
 import { ethers } from 'ethers'
 import abi from 'src/utils/CryptoTip.json'
 import { useAuth, useFirestore } from '@vueuse/firebase'
 import { collection } from 'firebase/firestore'
 import { useFirebase } from 'src/composables/firebase'
+import { useRouter } from 'vue-router'
 
 const appStore = useAppStore()
+const router = useRouter()
 
 const { isConnected, connectWallet } = useWallet()
 
@@ -60,8 +62,14 @@ const contractBalance = ref()
 
 const { auth, db } = useFirebase()
 const { isAuthenticated, user } = useAuth(auth)
+setTimeout(() => {
+  if (!user.value) {
+    router.push('/')
+  }
+}, 10000)
+const userQuery = computed(() => user.value?.uid && collection(db, 'user', user.value?.uid, 'transactions'))
+const transactions = useFirestore(userQuery, undefined)
 
-const transactions = useFirestore(collection(db, 'user', user.value ? user.value.uid : '', 'transactions'))
 watchEffect(async () => {
   if (isConnected) {
     try {

@@ -11,12 +11,7 @@
     <div class="row" style="gap: 50px">
       <div class="col-12 col-sm column items-center" style="border: solid gray 1px; border-radius: 15px">
         <h1 class="text-h5">Transactions</h1>
-        <ul v-if="isConnected && transactions">
-          <li>ds</li>
-          <li>ds</li>
-          <li>ds</li>
-          <li>ds</li>
-        </ul>
+        <q-table v-if="transactions" :rows="transactions" :columns="columns" row-key="hash" hide-bottom />
         <q-skeleton class="q-mb-lg" type="rect" width="80%" v-else height="150px" />
       </div>
       <div class="col column" style="gap: 50px">
@@ -46,6 +41,7 @@ import { useAuth, useFirestore } from '@vueuse/firebase'
 import { collection } from 'firebase/firestore'
 import { useFirebase } from 'src/composables/firebase'
 import { useRouter } from 'vue-router'
+import { shortAddress } from 'src/utils/utilitites'
 
 const appStore = useAppStore()
 const router = useRouter()
@@ -62,14 +58,25 @@ const contractBalance = ref()
 
 const { auth, db } = useFirebase()
 const { isAuthenticated, user } = useAuth(auth)
-setTimeout(() => {
-  if (!user.value) {
-    router.push('/')
-  }
-}, 10000)
-const userQuery = computed(() => user.value?.uid && collection(db, 'user', user.value?.uid, 'transactions'))
+// setTimeout(() => {
+//   if (!user.value) {
+//     router.push('/')
+//   }
+// }, 10000)
+const userQuery = computed(() => user.value?.uid && collection(db, 'users', user.value?.uid, 'transactions'))
 const transactions = useFirestore(userQuery, undefined)
 
+const columns = [
+  {
+    name: 'hash',
+    required: true,
+    label: 'Transaction Hash',
+    align: 'left',
+    field: (row: { hash: string }) => shortAddress(row.hash),
+    sortable: true,
+  },
+  { name: 'value', align: 'center', label: 'Value', field: (row: { value: string }) => row.value + ' ETH', sortable: true },
+]
 watchEffect(async () => {
   if (isConnected) {
     try {

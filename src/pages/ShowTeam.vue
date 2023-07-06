@@ -118,7 +118,7 @@ const sendTips = async () => {
 
         $q.notify({ type: 'positive', message: 'Tips successfully Sent ' + shortAddress(sendTipsTxn.hash) })
         if (user.value)
-          await setDoc(doc(db, 'users', user.value.uid, 'transaction', sendTipsTxn.hash), transaction).then(function () {
+          await setDoc(doc(db, 'users', user.value.uid, 'transactions', sendTipsTxn.hash), transaction).then(function () {
             $q.notify({ type: 'positive', message: 'Tips successfully Saved' })
           })
         reset()
@@ -141,7 +141,7 @@ const sendTips = async () => {
         // Create the transaction in firebase
         $q.notify({ type: 'positive', message: 'Tips successfully Pushed ' + shortAddress(sendTipsTxn.hash) })
         if (user.value)
-          await setDoc(doc(db, 'users', user.value.uid, 'transaction', sendTipsTxn.hash), transaction).then(function () {
+          await setDoc(doc(db, 'users', user.value.uid, 'transactions', sendTipsTxn.hash), transaction).then(function () {
             $q.notify({ type: 'positive', message: 'Tips successfully Saved' })
           })
         reset()

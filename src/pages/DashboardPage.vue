@@ -41,8 +41,11 @@ import { useAuth, useFirestore } from '@vueuse/firebase'
 import { collection } from 'firebase/firestore'
 import { useFirebase } from 'src/composables/firebase'
 import { shortAddress } from 'src/utils/utilitites'
+import { useRouter } from 'vue-router'
 
 const appStore = useAppStore()
+
+const router = useRouter()
 
 const { isConnected, connectWallet } = useWallet()
 
@@ -56,6 +59,11 @@ const contractBalance = ref()
 
 const { auth, db } = useFirebase()
 const { user } = useAuth(auth)
+setTimeout(() => {
+  if (!user.value) {
+    router.push('/')
+  }
+}, 10000)
 const userQuery = computed(() => user.value?.uid && collection(db, 'users', user.value?.uid, 'transactions'))
 const transactions = useFirestore(userQuery, undefined)
 

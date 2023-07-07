@@ -33,3 +33,6 @@ yarn-error.log*
 *.sln
 
 .env
+
+.nyc_output
+coverage/

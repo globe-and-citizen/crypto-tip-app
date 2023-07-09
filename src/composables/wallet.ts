@@ -1,17 +1,16 @@
-import { onBeforeUnmount, onMounted, Ref, ref, watchEffect } from 'vue'
+import { Ref, ref, watchEffect } from 'vue'
 import { ethers } from 'ethers'
 import { Web3Provider } from '@ethersproject/providers/src.ts/web3-provider'
-import { Signer } from '@ethersproject/abstract-signer'
+import { JsonRpcSigner } from '@ethersproject/providers/src.ts/json-rpc-provider'
 
 export function useWallet() {
   const web3_network = import.meta.env.VITE_WEB3_NETWORK ? import.meta.env.VITE_WEB3_NETWORK : 'any'
 
   const userAddress = ref()
   const isConnected = ref(false)
-  let intervalId: ReturnType<typeof setInterval> | null = null
   const provider: Ref<Web3Provider | undefined> = ref()
-  const signer: Ref<Signer | undefined> = ref()
-  const balance = ref('ds')
+  const signer: Ref<JsonRpcSigner | undefined> = ref()
+  const balance = ref('0')
 
   async function connectWallet() {
     try {
@@ -33,25 +32,25 @@ export function useWallet() {
     }
   }
 
-  onMounted(() => {
-    intervalId = setInterval(async () => {
+  watchEffect(async () => {
+    try {
       if (window.ethereum) {
         const accounts = await window.ethereum.request({ method: 'eth_accounts' })
         isConnected.value = accounts.length > 0
         userAddress.value = accounts.pop()
         provider.value = new ethers.providers.Web3Provider(window.ethereum, web3_network)
         signer.value = provider.value.getSigner()
-
-        // const bal = await signer.value.getBalance()
-        // balance.value = ethers.utils.formatEther()
+        if (await signer.value?.getAddress()) {
+          // const address = await signer.value?.getAddress()
+          // const bal = await provider.value?.getBalance(address)
+          // balance.value = ethers.utils.formatEther(bal)
+        }
       } else {
         isConnected.value = false
       }
-    }, 1000)
+    } catch (e) {
+      console.log(e)
+    }
   })
-  onBeforeUnmount(() => {
-    if (intervalId) clearInterval(intervalId)
-  })
-
   return { userAddress, isConnected, connectWallet, provider, signer, balance }
 }

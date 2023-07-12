@@ -102,8 +102,10 @@ onMounted(async () => {
       const provider = new ethers.providers.Web3Provider(ethereum, web3_network)
       const signer = provider.getSigner()
       const cryptoTipsContract = new ethers.Contract(contractAddress, contractABI, signer)
-      const balanceTxn = await cryptoTipsContract.getBalance(signer.getAddress())
-      balance.value = ethers.utils.formatEther(balanceTxn)
+      if (signer._address) {
+        const balanceTxn = await cryptoTipsContract.getBalance(signer._address)
+        balance.value = ethers.utils.formatEther(balanceTxn)
+      }
     }
   } catch (e) {
     console.log(e)

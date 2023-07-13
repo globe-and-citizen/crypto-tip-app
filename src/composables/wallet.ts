@@ -1,18 +1,9 @@
-import { onBeforeUnmount, onMounted, Ref, ref, watchEffect } from 'vue'
-import { ethers } from 'ethers'
-import { Web3Provider } from '@ethersproject/providers/src.ts/web3-provider'
-import { Signer } from '@ethersproject/abstract-signer'
+import { onBeforeUnmount, onMounted, ref } from 'vue'
 
 export function useWallet() {
-  const web3_network = import.meta.env.VITE_WEB3_NETWORK ? import.meta.env.VITE_WEB3_NETWORK : 'any'
-
   const userAddress = ref()
   const isConnected = ref(false)
-  let intervalId: ReturnType<typeof setInterval> | null = null
-  const provider: Ref<Web3Provider | undefined> = ref()
-  const signer: Ref<Signer | undefined> = ref()
-  const balance = ref('ds')
-
+  let intervalId: string | number | NodeJS.Timeout | undefined
   async function connectWallet() {
     try {
       if (typeof window.ethereum !== 'undefined') {
@@ -32,22 +23,24 @@ export function useWallet() {
       console.log('Error: ', error)
     }
   }
-  onMounted(() => {
+
+  onMounted(async () => {
     intervalId = setInterval(async () => {
-      if (window.ethereum) {
-        const accounts = await window.ethereum.request({ method: 'eth_accounts' })
-        isConnected.value = accounts.length > 0
-        userAddress.value = accounts.pop()
-        provider.value = new ethers.providers.Web3Provider(window.ethereum, web3_network)
-        signer.value = provider.value.getSigner()
-      } else {
-        isConnected.value = false
+      try {
+        if (window.ethereum) {
+          const accounts = await window.ethereum.request({ method: 'eth_accounts' })
+          isConnected.value = accounts.length > 0
+          userAddress.value = accounts.pop()
+        } else {
+          isConnected.value = false
+        }
+      } catch (e) {
+        console.log(e)
       }
     }, 1000)
   })
   onBeforeUnmount(() => {
     if (intervalId) clearInterval(intervalId)
   })
-
-  return { userAddress, isConnected, connectWallet, provider, signer, balance }
+  return { userAddress, isConnected, connectWallet }
 }

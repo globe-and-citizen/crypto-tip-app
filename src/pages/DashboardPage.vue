@@ -24,6 +24,16 @@
           <h2 class="text-h5">Contract Balance</h2>
           <p class="text-h5 text-bold" v-if="contractBalance && isConnected">{{ contractBalance.toString().substring(0, 5) }} Ether</p>
           <q-skeleton class="q-mb-lg" type="rect" width="80%" v-else />
+
+          <q-btn
+            @click="connectWallet"
+            icon="get_app"
+            data-cy="sign_in"
+            class="q-mb-lg"
+            v-if="contractBalance && isConnected && contractBalance.toString() !== '0.0'"
+          >
+            <div class="q-px-sm">Withdraw</div>
+          </q-btn>
         </div>
       </div>
     </div>
@@ -34,7 +44,7 @@
 import AppHeader from 'components/AppHeader.vue'
 import { useAppStore } from 'src/stores'
 import { useWallet } from 'src/composables/wallet'
-import { computed, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watchEffect } from 'vue'
 import { ethers } from 'ethers'
 import abi from 'src/utils/CryptoTip.json'
 import { useAuth, useFirestore } from '@vueuse/firebase'
@@ -58,12 +68,12 @@ const walletBalance = ref()
 const contractBalance = ref()
 
 const { auth, db } = useFirebase()
-const { user } = useAuth(auth)
-setTimeout(() => {
-  if (!user.value) {
-    router.push('/')
-  }
-}, 10000)
+const { user, isAuthenticated } = useAuth(auth)
+
+let intervalId: string | number | NodeJS.Timeout | undefined
+// watchEffect(() => {
+// })
+// // setTimeout(() => {}, 1000)
 const userQuery = computed(() => user.value?.uid && collection(db, 'users', user.value?.uid, 'transactions'))
 const transactions = useFirestore(userQuery, undefined)
 
@@ -79,20 +89,32 @@ const columns = [
   { name: 'value', align: 'center', label: 'Value', field: (row: { value: string }) => row.value + ' ETH', sortable: true },
 ]
 onMounted(async () => {
-  if (isConnected) {
-    try {
-      const { ethereum } = window
-      if (ethereum) {
-        const provider = new ethers.providers.Web3Provider(ethereum, web3_network)
-        const signer = provider.getSigner()
-        const cryptoTipsContract = new ethers.Contract(contractAddress, contractABI, signer)
-        const balanceTxn = await cryptoTipsContract.getBalance(signer.getAddress())
-        contractBalance.value = ethers.utils.formatEther(balanceTxn)
-        walletBalance.value = ethers.utils.formatEther(await signer.getBalance())
+  // Watcher on balances
+  intervalId = setInterval(async () => {
+    if (isConnected.value) {
+      try {
+        const { ethereum } = window
+        if (ethereum) {
+          const provider = new ethers.providers.Web3Provider(ethereum, web3_network)
+          const signer = provider.getSigner()
+          const cryptoTipsContract = new ethers.Contract(contractAddress, contractABI, signer)
+          const balanceTxn = await cryptoTipsContract.getBalance(signer.getAddress())
+          contractBalance.value = ethers.utils.formatEther(balanceTxn)
+          walletBalance.value = ethers.utils.formatEther(await signer.getBalance())
+        }
+      } catch (e) {
+        console.log(e)
       }
-    } catch (e) {
-      console.log(e)
     }
-  }
+  }, 5000)
+
+  setTimeout(() => {
+    if (!isAuthenticated.value) {
+      router.push('/')
+    }
+  }, 5000)
+})
+onBeforeUnmount(() => {
+  if (intervalId) clearInterval(intervalId)
 })
 </script>

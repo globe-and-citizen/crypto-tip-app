@@ -32,7 +32,6 @@ export function useWallet() {
       console.log('Error: ', error)
     }
   }
-
   onMounted(() => {
     intervalId = setInterval(async () => {
       if (window.ethereum) {
@@ -41,9 +40,6 @@ export function useWallet() {
         userAddress.value = accounts.pop()
         provider.value = new ethers.providers.Web3Provider(window.ethereum, web3_network)
         signer.value = provider.value.getSigner()
-
-        // const bal = await signer.value.getBalance()
-        // balance.value = ethers.utils.formatEther()
       } else {
         isConnected.value = false
       }

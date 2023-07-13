@@ -22,11 +22,13 @@ import { computed } from 'vue'
 import AppHeader from 'components/AppHeader.vue'
 import { useAppStore } from 'src/stores'
 import TeamComponent from 'components/TeamComponent.vue'
+import { useQuasar } from 'quasar'
 
 const appStore = useAppStore()
 
 const { auth, db } = useFirebase()
 const { isAuthenticated, user } = useAuth(auth)
+const $q = useQuasar()
 const signIn = () => {
   if (import.meta.env.VITE_MODE == 'test') {
     signInAnonymously(auth).then(async (result) => {
@@ -42,6 +44,9 @@ const signIn = () => {
       const { email, displayName, photoURL, uid } = result.user
       if (isNewUser) {
         await setDoc(doc(db, 'users', uid), { email, displayName, photoURL })
+        $q.notify({ type: 'info', message: 'Welcome to our platform! ' })
+      } else {
+        $q.notify({ type: 'info', message: "Welcome back! It's great to see you again." })
       }
     })
   }

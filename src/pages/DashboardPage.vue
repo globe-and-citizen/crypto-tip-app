@@ -44,7 +44,7 @@
 import AppHeader from 'components/AppHeader.vue'
 import { useAppStore } from 'src/stores'
 import { useWallet } from 'src/composables/wallet'
-import { computed, onBeforeUnmount, onMounted, ref, watchEffect } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { ethers } from 'ethers'
 import abi from 'src/utils/CryptoTip.json'
 import { useAuth, useFirestore } from '@vueuse/firebase'

@@ -91,7 +91,7 @@ const { userAddress, connectWallet } = useWallet()
 const balance = ref('0')
 
 // Contract Address & ABI
-const contractAddress = '0x8dF19235ca744C3F0A68d259c9625cB9CE92eE82'
+const contractAddress = import.meta.env.VITE_WEB3_GOERLI_CONTRACT_ADDRESS
 const contractABI = abi.abi
 const web3_network = import.meta.env.WEB3_NETWORK ? import.meta.env.WEB3_NETWORK : 'any'
 

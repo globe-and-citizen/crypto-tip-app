@@ -34,7 +34,7 @@
 import AppHeader from 'components/AppHeader.vue'
 import { useAppStore } from 'src/stores'
 import { useWallet } from 'src/composables/wallet'
-import { computed, ref, watchEffect } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { ethers } from 'ethers'
 import abi from 'src/utils/CryptoTip.json'
 import { useAuth, useFirestore } from '@vueuse/firebase'
@@ -50,7 +50,7 @@ const router = useRouter()
 const { isConnected, connectWallet } = useWallet()
 
 // Contract Address & ABI
-const contractAddress = '0x8dF19235ca744C3F0A68d259c9625cB9CE92eE82'
+const contractAddress = import.meta.env.VITE_WEB3_GOERLI_CONTRACT_ADDRESS
 const contractABI = abi.abi
 const web3_network = import.meta.env.WEB3_NETWORK ? import.meta.env.WEB3_NETWORK : 'any'
 
@@ -78,7 +78,7 @@ const columns = [
   },
   { name: 'value', align: 'center', label: 'Value', field: (row: { value: string }) => row.value + ' ETH', sortable: true },
 ]
-watchEffect(async () => {
+onMounted(async () => {
   if (isConnected) {
     try {
       const { ethereum } = window

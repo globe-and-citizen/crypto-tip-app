@@ -26,7 +26,7 @@
           <q-skeleton class="q-mb-lg" type="rect" width="80%" v-else />
 
           <q-btn
-            @click="connectWallet"
+            @click="withdraw"
             icon="get_app"
             data-cy="sign_in"
             class="q-mb-lg"
@@ -117,4 +117,20 @@ onMounted(async () => {
 onBeforeUnmount(() => {
   if (intervalId) clearInterval(intervalId)
 })
+const withdraw = async () => {
+  try {
+    const { ethereum } = window
+    if (ethereum) {
+      const provider = new ethers.providers.Web3Provider(ethereum, web3_network)
+      const signer = provider.getSigner()
+      const cryptoTipsContract = new ethers.Contract(contractAddress, contractABI, signer)
+      const withdrawTxn = await cryptoTipsContract.withdraw()
+      await withdrawTxn.wait()
+      $q.notify({ type: 'positive', message: 'Tips successfully withdraw ' + shortAddress(withdrawTxn.hash) })
+    }
+  } catch (e) {
+    $q.notify({ type: 'negative', message: 'Unable to withdraw ' })
+    console.log(e)
+  }
+}
 </script>

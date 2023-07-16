@@ -1,53 +1,58 @@
 <template>
-  <AppHeader
-    title="Crypto Tips"
-    @toggleRightDrawer="appStore.toggleDrawer()"
-  />
-  <q-page class="justify-evenly">
+  <AppHeader title="Crypto Tips" @toggleRightDrawer="appStore.toggleDrawer()" />
+  <q-page style="max-width: 768px; width: 100%">
     <div v-if="isAuthenticated" class="q-pa-md">
       <TeamComponent v-for="team in teams" :key="team.uid" :team="team"></TeamComponent>
-      <q-btn to="/addTeam">
-        Add Team
-      </q-btn>
+      <div class="row justify-center q-pa-xl">
+        <q-btn to="/addTeam" data-cy="add_team"> Add Team </q-btn>
+      </div>
     </div>
-    <div v-else>
-      <q-btn @click="signIn">
-        Sign In with Google
-      </q-btn>
+    <div v-else class="q-pa-xl">
+      <q-btn @click="signIn" icon="google" data-cy="sign_in"> Sign In with Google </q-btn>
     </div>
   </q-page>
 </template>
 
 <script setup lang="ts">
-import {useFirebase} from 'src/composables/firebase';
-import {useFirestore, useAuth} from '@vueuse/firebase';
-import {doc, setDoc, collection, where, query} from 'firebase/firestore'
-import {GoogleAuthProvider, signInWithPopup, getAdditionalUserInfo} from 'firebase/auth'
-import {computed} from 'vue';
-import AppHeader from 'components/AppHeader.vue';
-import {useAppStore} from 'src/stores';
-import TeamComponent from 'components/TeamComponent.vue';
+import { useFirebase } from 'src/composables/firebase'
+import { useFirestore, useAuth } from '@vueuse/firebase'
+import { doc, setDoc, collection, where, query } from 'firebase/firestore'
+import { GoogleAuthProvider, signInWithPopup, signInAnonymously, getAdditionalUserInfo } from 'firebase/auth'
+import { computed } from 'vue'
+import AppHeader from 'components/AppHeader.vue'
+import { useAppStore } from 'src/stores'
+import TeamComponent from 'components/TeamComponent.vue'
+import { useQuasar } from 'quasar'
 
 const appStore = useAppStore()
 
-const {auth, db} = useFirebase()
-const {isAuthenticated, user} = useAuth(auth)
-const signIn = () => signInWithPopup(auth, new GoogleAuthProvider()).then(
-  async (result) => {
-    const isNewUser = getAdditionalUserInfo(result)?.isNewUser
-    const {email, displayName, photoURL, uid} = result.user
-
-    if (isNewUser) {
-      await setDoc(doc(db, 'users', uid), {email, displayName, photoURL})
-    }
+const { auth, db } = useFirebase()
+const { isAuthenticated, user } = useAuth(auth)
+const $q = useQuasar()
+const signIn = () => {
+  if (import.meta.env.VITE_MODE == 'test') {
+    signInAnonymously(auth).then(async (result) => {
+      const isNewUser = getAdditionalUserInfo(result)?.isNewUser
+      const { uid } = result.user
+      if (isNewUser) {
+        await setDoc(doc(db, 'users', uid), { email: '', displayName: '', photoURL: '' })
+      }
+    })
+  } else {
+    signInWithPopup(auth, new GoogleAuthProvider()).then(async (result) => {
+      const isNewUser = getAdditionalUserInfo(result)?.isNewUser
+      const { email, displayName, photoURL, uid } = result.user
+      if (isNewUser) {
+        await setDoc(doc(db, 'users', uid), { email, displayName, photoURL })
+        $q.notify({ type: 'info', message: 'Welcome to our platform! ' })
+      } else {
+        $q.notify({ type: 'info', message: "Welcome back! It's great to see you again." })
+      }
+    })
   }
-)
+}
 
-let teamsQuery = computed(() => query(
-  collection(db, 'teams'),
-  where('user', '==', user.value ? user.value.uid : '')
-))
+const teamsQuery = computed(() => query(collection(db, 'teams'), where('user', '==', user.value ? user.value.uid : '')))
 
-const teams = useFirestore(teamsQuery)
-
+const teams = useFirestore(teamsQuery, undefined, { autoDispose: false })
 </script>

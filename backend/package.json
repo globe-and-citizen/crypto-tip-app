@@ -1,12 +1,24 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Crypto Tips Backend",
+  "main": "src/index.js",
+  "type": "module",
   "scripts": {
+    "run": "nodemon src/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
+  "keywords": [
+    "crypto",
+    "tips",
+    "backend",
+    "nodejs",
+    "express",
+    "ethers",
+    "siwe",
+    "cors",
+    "jsonwebtoken"
+  ],
   "author": "",
   "license": "ISC",
   "dependencies": {

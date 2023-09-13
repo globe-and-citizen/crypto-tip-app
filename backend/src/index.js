@@ -6,7 +6,7 @@ import jwt from 'jsonwebtoken';
 const app = express();
 app.use(express.json());
 app.use(cors({
-    origin: 'http://localhost:8080',
+    origin: 'http://localhost:9200',
     credentials: true,
 }))
 

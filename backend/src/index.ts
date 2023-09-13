@@ -3,6 +3,7 @@ import express from 'express';
 import {generateNonce, SiweMessage} from 'siwe';
 import jwt from 'jsonwebtoken';
 
+console.log("1")
 const app = express();
 app.use(express.json());
 app.use(cors({
@@ -33,7 +34,7 @@ app.post('/verify', async function (req, res) {
         res.send(false);
     }
 });
-let userInformation
+let userInformation: string | jwt.JwtPayload | undefined
 app.use(function (req, res, next) {
     const token = req.headers.authorization;
     if (!token) {
@@ -57,6 +58,7 @@ app.get('/personal_info', function (req, res) {
     res.send(userInformation);
 });
 
+// @ts-ignore
 const port = parseInt(process.env.PORT) || 3000;
 app.listen(port, () => {
     console.log(`helloworld: listening on port ${port}`);

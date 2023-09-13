@@ -56,7 +56,6 @@ async function createSiweMessage(address, statement) {
     chainId: '1',
     nonce
   });
-  console.log('nonce recived : ', nonce)
   return message.prepareMessage();
 }
 
@@ -66,11 +65,11 @@ const signInWithEthereum = async () => {
   address = await signer.getAddress()
   const message = await createSiweMessage(
     address,
-    'Sign in with Ethereum to the app.'
+    'Sign in with Ethereum to the Crypto Tips.'
   );
   const signature = await signer.signMessage(message);
-  console.log('message : \'', message, '\'')
-  console.log('signature : \'', signature, '\'')
+  console.log('message : \n', message)
+  console.log('signature : \n', signature)
 
   const res = await fetch(`${BACKEND_ADDR}/verify`, {
     method: 'POST',

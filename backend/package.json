@@ -7,6 +7,7 @@
     "start": "nodemon src/index.ts",
     "build": "tsc",
     "prod": "ts-node  src/index.ts",
+    "prodv2": "node  dist/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [

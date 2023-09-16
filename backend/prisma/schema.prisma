@@ -16,18 +16,21 @@ model User {
   address      String        @id @unique
   name         String?
   transactions Transaction[]
+  Team         Team[]
 }
 
 model Team {
   id          Int      @id @default(autoincrement())
   members     String[]
   owner       User     @relation(fields: [ownerId], references: [address])
+  ownerId     String
   description String?
 }
 
 model Transaction {
   id            Int      @id @default(autoincrement())
   author        User     @relation(fields: [authorId], references: [address])
+  authorId      String
   hash          String
   members       String[]
   senderAddress String

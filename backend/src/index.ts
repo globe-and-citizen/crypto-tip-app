@@ -2,8 +2,10 @@ import cors from 'cors';
 import express from 'express';
 import {generateNonce, SiweMessage} from 'siwe';
 import jwt from 'jsonwebtoken';
+import {PrismaClient} from '@prisma/client'
 
-console.log("1")
+const prisma = new PrismaClient()
+
 const app = express();
 app.use(express.json());
 app.use(cors({
@@ -15,6 +17,34 @@ app.get('/nonce', async function (req, res) {
 
     res.setHeader('Content-Type', 'text/plain');
     res.send(generateNonce());
+});
+
+// create a get request to get the all user information
+app.get('/users', async function (req, res) {
+    const users = await prisma.user.findMany()
+    res.json(users)
+})
+app.get('/main', async function (req, res) {
+
+    try {
+        const user = await prisma.user.create({
+            data: {
+                name: 'Alice',
+                email: 'alice2@prisma.io',
+            },
+        })
+        console.log(user)
+        res.setHeader('Content-Type', 'text/plain');
+        res.send(user);
+
+    } catch (e) {
+
+        res.send("Error Occure");
+        console.error(e)
+    } finally {
+        await prisma.$disconnect()
+    }
+
 });
 const secretKey = 'your-secret-key';
 const sessionExpiry = '1h'; // Set the session expiry time to 1 hour.

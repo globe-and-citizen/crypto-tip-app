@@ -81,7 +81,7 @@ const signInWithEthereum = async () => {
   });
 
   if (!res.ok) {
-    console.error(`Failed in getInformation: ${res.statusText}`);
+    console.error(`Failed to verify the signature: ${res.statusText}`);
     return
   }
   const {token} = await res.json();
@@ -92,6 +92,10 @@ const signInWithEthereum = async () => {
       'Authorization': token,
     }
   });
+  if (!data.ok) {
+    console.error(`Failed in getInformation: ${res.statusText}`);
+    return
+  }
 
   console.log('response', await data.json());
 }

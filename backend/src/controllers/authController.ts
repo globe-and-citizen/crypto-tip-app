@@ -1,6 +1,14 @@
 import {generateNonce, SiweMessage} from 'siwe';
 import {Request, Response} from 'express';
 import jwt from 'jsonwebtoken';
+import {PrismaClient} from '@prisma/client';
+
+const prisma = new PrismaClient()
+
+interface CreateUserInput {
+    name: string;
+    address: string;
+}
 
 const getNonce = async (req: Request, res: Response) => {
     res.setHeader('Content-Type', 'text/plain');
@@ -14,23 +22,41 @@ const verify = async (req: Request, res: Response) => {
         const {message, signature} = req.body;
         const SIWEObject = new SiweMessage(message);
         /**
-         * verify the signature
+         * Verify the signature
          * @param signature
          * @returns {Promise<SiweResponse>}  This object if valid.
          * @throws {Error} If the signature is invalid.
          */
         const {data: newMessage} = await SIWEObject.verify({signature});
 
-        // find the user with the given address in the database 
-        // if not existe create the user and save it in the database using prisma
-        
+        // check if user exists, if not create a new user record
+        const user = await prisma.user.findUnique({
+            where: {
+                'address': SIWEObject.address
+            }
+        });
+        let status: number = 200;
+        if (user === null) {
+            // create a new user record
+            const newUser = await prisma.user.create({
+                data: {
+                    address: SIWEObject.address
+                }
+            });
+            status = newUser ? 201 : 200;
+        }
+
         // convert newMessage object into a  plain javascript object JSON
         const value = JSON.parse(JSON.stringify(newMessage));
         const token = jwt.sign(value, secretKey, {expiresIn: sessionExpiry});
-        res.status(200).json({token});
-    } catch (e) {
+        res.status(status).json({token});
+    } catch (e: any) {
         console.log('Error: ', e)
-        return res.status(401).json({message: 'Authentication failed. Please provide valid signature.', error: e});
+        if (e.error?.type === 'Signature does not match address of the message.') {
+            return res.status(401).json({message: 'Authentication failed. Please provide valid signature.', error: e});
+        } else {
+            return res.status(500).json({message: 'Internal server error.'})
+        }
     }
 }
 export {getNonce, verify}

@@ -59,4 +59,17 @@ const verify = async (req: Request, res: Response) => {
         }
     }
 }
-export {getNonce, verify}
+
+const getMyProfile = async (req: Request, res: Response) => {
+    const tokenData = req.body.decoded;
+    const profile = await prisma.user.findUnique({
+        where: {
+            'address': tokenData?.address
+        }
+    });
+    if (profile === null) {
+        return res.status(404).json({message: 'User not found'});
+    }
+    res.status(200).json(profile);
+}
+export {getNonce, verify, getMyProfile}

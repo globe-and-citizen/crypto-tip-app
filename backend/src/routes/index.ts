@@ -1,6 +1,6 @@
 import express from 'express';
 import {generateNonce} from 'siwe';
-import {verify} from '../controllers/authController';
+import {getMyProfile, verify} from '../controllers/authController';
 import {verifyToken} from '../middleware/authMiddleware';
 
 const router = express.Router();
@@ -12,6 +12,5 @@ router.get('/nonce', async function (req, res) {
 });
 
 router.post('/verify', verify);
-router.get('/protected', verifyToken, (req, res) => {
-});
+router.get('/protected', verifyToken, getMyProfile);
 export default router;

@@ -25,6 +25,7 @@ model Team {
   owner       User     @relation(fields: [ownerId], references: [address])
   ownerId     String
   description String?
+  name        String @default("name")
 }
 
 model Transaction {

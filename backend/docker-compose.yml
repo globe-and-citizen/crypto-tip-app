@@ -5,7 +5,7 @@ services:
 
   db:
     image: postgres
-    restart: always
+#    restart: always
     container_name: postgres_db
     environment:
       POSTGRES_USER: root
@@ -18,7 +18,7 @@ services:
 
   adminer:
     image: adminer
-    restart: always
+#    restart: always
     ports:
       - "8080:8080"
 

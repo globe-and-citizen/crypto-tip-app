@@ -5,11 +5,6 @@ import {PrismaClient} from '@prisma/client';
 
 const prisma = new PrismaClient()
 
-interface CreateUserInput {
-    name: string;
-    address: string;
-}
-
 const getNonce = async (req: Request, res: Response) => {
     res.setHeader('Content-Type', 'text/plain');
     res.send(generateNonce());

@@ -1,8 +1,10 @@
 import {Request, Response, NextFunction} from 'express';
 import jwt from 'jsonwebtoken';
+import {PrismaClient} from '@prisma/client';
 
 const secretKey = process.env.SECRET_KEY as string;
 
+const prisma = new PrismaClient();
 /**
  * Verify token middleware checking if the token is valid
  * Add decoded in the request data
@@ -33,3 +35,19 @@ export const verifyToken = (req: Request, res: Response, next: NextFunction) => 
     });
     next();
 };
+
+
+// Add the user information in the request data
+export const getUser = async (req: Request, res: Response, next: NextFunction) => {
+    const tokenData = req.body.decoded;
+    const profile = await prisma.user.findUnique({
+        where: {
+            'address': tokenData?.address
+        }
+    });
+    if (profile === null) {
+        return res.status(404).json({message: 'User not found'});
+    }
+    req.body.user = profile;
+    next();
+}

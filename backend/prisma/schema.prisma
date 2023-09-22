@@ -20,18 +20,21 @@ model User {
 }
 
 model Team {
-  id          Int      @id @default(autoincrement())
+  id          Int           @id @default(autoincrement())
   members     String[]
-  owner       User     @relation(fields: [ownerId], references: [address])
+  owner       User          @relation(fields: [ownerId], references: [address])
   ownerId     String
   description String?
-  name        String @default("name")
+  name        String        @default("name")
+  Transaction Transaction[]
 }
 
 model Transaction {
   id            Int      @id @default(autoincrement())
   author        User     @relation(fields: [authorId], references: [address])
   authorId      String
+  team          Team     @relation(fields: [teamId], references: [id])
+  teamId        Int
   hash          String
   members       String[]
   senderAddress String

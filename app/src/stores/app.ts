@@ -16,5 +16,6 @@ export const useAppStore = defineStore('app', {
     setToken(token: string) {
       this._token = token
     }
-  }
+  },
+  persist: true,
 })

@@ -2,7 +2,9 @@
   <AppHeader title="Crypto Tips" @toggleRightDrawer="appStore.toggleDrawer()"/>
   <q-page style="max-width: 768px; width: 100%">
     <div v-if="appStore.getToken" class="q-pa-md">
-      <!--      <TeamComponent v-for="team in teams" :key="team.uid" :team="team"></TeamComponent>-->
+      <div v-if="!error && isFinished && !isFetching">
+        <TeamComponent v-for="team in teams" :key="team.uid" :team="team"></TeamComponent>
+      </div>
       <div class="row justify-center q-pa-xl">
         <q-btn to="/addTeam" data-cy="add_team"> Add Team</q-btn>
       </div>
@@ -19,7 +21,9 @@ import {useAppStore} from 'src/stores'
 import {useQuasar} from 'quasar'
 import {ethers} from 'ethers';
 import {SiweMessage} from 'siwe';
+import {useFetch} from '@vueuse/core'
 import {useWallet} from '../composables/wallet';
+import TeamComponent from '../components/TeamComponent.vue';
 
 const {isConnected, connectWallet} = useWallet()
 const appStore = useAppStore()
@@ -28,6 +32,22 @@ const $q = useQuasar()
 
 const BACKEND_ADDR = 'http://localhost:3000'
 
+const {execute, isFetching, isFinished, error, data: teams} = useFetch(BACKEND_ADDR + '/teams', {
+  beforeFetch({options, cancel}) {
+    console.log('before fetch', appStore.getToken)
+    if (!appStore.getToken)
+      cancel()
+
+    options.headers = {
+      ...options.headers,
+      Authorization: `Bearer ${appStore.getToken}`,
+    }
+    return {
+      options,
+    }
+  },
+  immediate: false
+})
 const domain = window.location.host;
 const origin = window.location.origin;
 const provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -92,8 +112,8 @@ const signInWithEthereum = async () => {
   }
   const {token} = await res.json();
   appStore.setToken(token)
-}
 
-// get the team form the API
+  await execute()
+}
 
 </script>

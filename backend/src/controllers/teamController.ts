@@ -4,8 +4,7 @@ import {Request, Response} from 'express';
 
 const prisma = new PrismaClient();
 // Create a new team
-const createTeam = async (req: Request, res: Response) => {
-    // log res and req
+const addTeam = async (req: Request, res: Response) => {
     const {name, members, description} = req.body;
     try {
         const team = await prisma.team.create({
@@ -92,4 +91,4 @@ const deleteTeam = async (req: Request, res: Response) => {
     res.status(200).json(team);
 }
 
-export {createTeam, updateTeam, deleteTeam, getTeam, getAllTeams};
+export {addTeam, updateTeam, deleteTeam, getTeam, getAllTeams};

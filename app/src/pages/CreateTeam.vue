@@ -1,10 +1,10 @@
 <template>
-  <AppHeader title="Create New Team" back_link="/" @toggleRightDrawer="appStore.toggleDrawer()" />
+  <AppHeader title="Create New Team" back_link="/" @toggleRightDrawer="appStore.toggleDrawer()"/>
   <q-page style="max-width: 768px" class="full-width">
     <div class="q-pa-md">
       <q-form @submit="onSubmit()" @reset="onReset" class="q-gutter-md">
-        <q-input outlined v-model="team.name" label="Team Name" />
-        <q-input outlined v-model="team.description" type="textarea" label="Description" />
+        <q-input outlined v-model="team.name" label="Team Name"/>
+        <q-input outlined v-model="team.description" type="textarea" label="Description"/>
         <q-input
           outlined
           v-for="(m, i) in team.members"
@@ -15,14 +15,14 @@
           :rules="[(value) => isAddress(value) || 'You need to add a valid address']"
         >
           <template v-slot:before>
-            <q-icon name="add" color="primary" @click="addTeamMember(i + 1)" />
-            <q-icon name="remove" color="red" @click="removeTeamMember(i)" v-if="team.members.length > 1" />
+            <q-icon name="add" color="primary" @click="addTeamMember(i + 1)"/>
+            <q-icon name="remove" color="red" @click="removeTeamMember(i)" v-if="team.members.length > 1"/>
           </template>
         </q-input>
 
         <div>
-          <q-btn label="Add Team" type="submit  " color="primary" />
-          <q-btn label="Reset" type="reset" color="primary" flat class="q-ml-sm" />
+          <q-btn label="Add Team" type="submit  " color="primary"/>
+          <q-btn label="Reset" type="reset" color="primary" flat class="q-ml-sm"/>
         </div>
       </q-form>
     </div>
@@ -31,37 +31,51 @@
 
 <script setup lang="ts">
 import AppHeader from 'components/AppHeader.vue'
-import { useAppStore } from 'src/stores'
-import { ref } from 'vue'
-import { useFirebase } from 'src/composables/firebase'
-import { useAuth } from '@vueuse/firebase'
-import { doc, setDoc } from 'firebase/firestore'
-import { ulid } from 'ulid'
-import { useQuasar } from 'quasar'
-import { ethers } from 'ethers'
-import { useRouter } from 'vue-router'
+import {useAppStore} from 'src/stores'
+import {ref} from 'vue'
+import {useQuasar} from 'quasar'
+import {ethers} from 'ethers'
+import {useRouter} from 'vue-router'
+import {useFetch} from '@vueuse/core';
 
+const BACKEND_ADDR = 'http://localhost:3000'
 const appStore = useAppStore()
-const { auth, db } = useFirebase()
-const { isAuthenticated, user } = useAuth(auth)
 
-const id = ulid()
 const $q = useQuasar()
 const router = useRouter()
 
-if (!isAuthenticated) {
-  // TODO redirect to home page
-}
 const initialTeamValue = {
-  uid: id,
   name: '',
   description: '',
   address: '',
   members: ['', ''],
-  user: user.value?.uid,
 }
 const team = ref(initialTeamValue)
 
+const {execute, isFetching, isFinished, error, data} = useFetch(BACKEND_ADDR + '/teams', {
+  beforeFetch({options, cancel}) {
+    console.log('before fetch', appStore.getToken)
+    if (!appStore.getToken)
+      cancel()
+    console.log('team', team.value)
+    options.body = JSON.stringify(team.value)
+
+    options.headers = {
+      ...options.headers,
+      Authorization: `Bearer ${appStore.getToken}`,
+    }
+    return {
+      options,
+    }
+  },
+  // afterFetch({options, response}) {
+  //   if(response.status==201){
+  //     $q.notify({type: 'positive', message: 'Team successfully Created'})
+  //   }
+  //   return response
+  // },
+  immediate: false
+}).post().json()
 const addTeamMember = function (index: number) {
   team.value.members.splice(index, 0, '')
 }
@@ -71,20 +85,19 @@ const removeTeamMember = function (index: number) {
 }
 const onSubmit = async function () {
   console.log('Submit')
-  await setDoc(doc(db, 'teams', id), team.value).then(function () {
-    team.value = initialTeamValue
-    $q.notify({ type: 'positive', message: 'Team successfully Created' })
-    router.push('/')
-  })
+  await execute()
+
+  onReset()
+
+  $q.notify({type: 'positive', message: 'Team successfully Created'})
+
 }
-const onReset = async function () {
+const onReset = function () {
   team.value = {
-    uid: id,
     name: '',
     description: '',
     address: '',
     members: ['', ''],
-    user: user.value?.uid,
   }
 }
 

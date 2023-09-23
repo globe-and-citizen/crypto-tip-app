@@ -3,6 +3,7 @@ import {generateNonce} from 'siwe';
 import {getMyProfile, verify} from '../controllers/authController';
 import {verifyToken, getUser} from '../middleware/authMiddleware';
 import {addTeam, getTeam, getAllTeams, deleteTeam, updateTeam} from '../controllers/teamController';
+import {addTransaction} from '../controllers/transactionController';
 
 const router = express.Router();
 
@@ -22,4 +23,6 @@ router.get('/teams/:id', [verifyToken, getUser], getTeam);
 router.put('/teams/:id', [verifyToken, getUser], updateTeam);
 router.delete('/teams/:id', [verifyToken, getUser], deleteTeam);
 
+// Transaction Controller
+router.post('/transactions', [verifyToken], addTransaction);
 export default router;

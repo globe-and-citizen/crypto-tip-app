@@ -37,7 +37,6 @@ model Transaction {
   teamId        Int
   hash          String
   members       String[]
-  senderAddress String
   type          String
   value         String
 }

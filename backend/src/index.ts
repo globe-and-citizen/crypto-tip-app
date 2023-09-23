@@ -1,8 +1,7 @@
 import cors from 'cors';
 import express from 'express';
-import {generateNonce, SiweMessage} from 'siwe';
-import jwt from 'jsonwebtoken';
 import {PrismaClient} from '@prisma/client'
+import router from './routes/index'
 
 const prisma = new PrismaClient()
 
@@ -13,83 +12,10 @@ app.use(cors({
     credentials: true,
 }))
 
-app.get('/nonce', async function (req, res) {
+app.use(router)
 
-    res.setHeader('Content-Type', 'text/plain');
-    res.send(generateNonce());
-});
 
-// create a get request to get the all user information
-app.get('/users', async function (req, res) {
-    const users = await prisma.user.findMany()
-    res.json(users)
-})
-app.get('/main', async function (req, res) {
-
-    try {
-        const user = await prisma.user.create({
-            data: {
-                name: 'Alice',
-                email: 'alice2@prisma.io',
-            },
-        })
-        console.log(user)
-        res.setHeader('Content-Type', 'text/plain');
-        res.send(user);
-
-    } catch (e) {
-
-        res.send("Error Occure");
-        console.error(e)
-    } finally {
-        await prisma.$disconnect()
-    }
-
-});
-const secretKey = 'your-secret-key';
-const sessionExpiry = '1h'; // Set the session expiry time to 1 hour.
-
-app.post('/verify', async function (req, res) {
-    const {message, signature} = req.body;
-    const SIWEObject = new SiweMessage(message);
-
-    try {
-        const {data: newMessage} = await SIWEObject.verify({signature});
-        // convert newMessage object into a  plain javascript object JSON
-        const value = JSON.parse(JSON.stringify(newMessage));
-        const token = jwt.sign(value, secretKey, {expiresIn: sessionExpiry});
-        res.status(200).json({token});
-    } catch (e) {
-        console.log('Error: ', e)
-        res.send(false);
-    }
-});
-let userInformation: string | jwt.JwtPayload | undefined
-app.use(function (req, res, next) {
-    const token = req.headers.authorization;
-    if (!token) {
-        return res.status(401).json({message: 'Token is missing'});
-    }
-    // Verify token and call `next()`
-    jwt.verify(token, secretKey, (err, decoded) => {
-        if (err) {
-            // Token is invalid
-            return res.status(401).json({message: 'Token is invalid'});
-        }
-        // Token is valid, and `decoded` contains the payload data
-        userInformation = decoded
-        next();
-    })
-    next();
-});
-
-// verifiying the token
-app.get('/personal_info', function (req, res) {
-    res.send(userInformation);
-});
-
-// @ts-ignore
-const port = parseInt(process.env.PORT) || 3000;
+const port = parseInt(process.env.PORT as string) || 3000;
 app.listen(port, () => {
     console.log(`helloworld: listening on port ${port}`);
 });

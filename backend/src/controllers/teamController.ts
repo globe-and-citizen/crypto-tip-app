@@ -30,6 +30,9 @@ const getTeam = async (req: Request, res: Response) => {
             where: {
                 id: Number(id),
             },
+            include: {
+                transactions: true,
+            }
         });
 
         // Handle  404

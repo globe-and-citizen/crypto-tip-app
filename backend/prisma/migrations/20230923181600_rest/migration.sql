@@ -15,6 +15,7 @@ CREATE TABLE "Team" (
     "members" TEXT[],
     "ownerId" TEXT NOT NULL,
     "description" TEXT,
+    "name" TEXT NOT NULL DEFAULT 'name',
 
     CONSTRAINT "Team_pkey" PRIMARY KEY ("id")
 );
@@ -23,9 +24,9 @@ CREATE TABLE "Team" (
 CREATE TABLE "Transaction" (
     "id" SERIAL NOT NULL,
     "authorId" TEXT NOT NULL,
+    "teamId" INTEGER NOT NULL,
     "hash" TEXT NOT NULL,
     "members" TEXT[],
-    "senderAddress" TEXT NOT NULL,
     "type" TEXT NOT NULL,
     "value" TEXT NOT NULL,
 
@@ -40,3 +41,6 @@ ALTER TABLE "Team" ADD CONSTRAINT "Team_ownerId_fkey" FOREIGN KEY ("ownerId") RE
 
 -- AddForeignKey
 ALTER TABLE "Transaction" ADD CONSTRAINT "Transaction_authorId_fkey" FOREIGN KEY ("authorId") REFERENCES "User"("address") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Transaction" ADD CONSTRAINT "Transaction_teamId_fkey" FOREIGN KEY ("teamId") REFERENCES "Team"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

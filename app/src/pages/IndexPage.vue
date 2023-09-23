@@ -19,7 +19,9 @@ import {useAppStore} from 'src/stores'
 import {useQuasar} from 'quasar'
 import {ethers} from 'ethers';
 import {SiweMessage} from 'siwe';
+import {useWallet} from '../composables/wallet';
 
+const {isConnected, connectWallet} = useWallet()
 const appStore = useAppStore()
 
 const $q = useQuasar()
@@ -49,6 +51,10 @@ async function createSiweMessage(address, statement) {
 }
 
 const signInWithEthereum = async () => {
+  console.log('is connected', isConnected.value)
+  if (!isConnected.value) {
+    await connectWallet()
+  }
   const signer = await provider.getSigner();
   address = await signer.getAddress()
   const message = await createSiweMessage(address, 'Sign in with Ethereum to the Crypto Tips.');

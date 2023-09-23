@@ -16,7 +16,7 @@ model User {
   address      String        @id @unique
   name         String?
   transactions Transaction[]
-  Team         Team[]
+  teams         Team[]
 }
 
 model Team {
@@ -26,7 +26,7 @@ model Team {
   ownerId     String
   description String?
   name        String        @default("name")
-  Transaction Transaction[]
+  transactions Transaction[]
 }
 
 model Transaction {

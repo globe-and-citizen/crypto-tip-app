@@ -3,7 +3,7 @@ import {generateNonce} from 'siwe';
 import {getMyProfile, verify} from '../controllers/authController';
 import {verifyToken, getUser} from '../middleware/authMiddleware';
 import {addTeam, getTeam, getAllTeams, deleteTeam, updateTeam} from '../controllers/teamController';
-import {addTransaction} from '../controllers/transactionController';
+import {addTransaction, getAllTransactions, getTransaction} from '../controllers/transactionController';
 
 const router = express.Router();
 
@@ -24,5 +24,9 @@ router.put('/teams/:id', [verifyToken, getUser], updateTeam);
 router.delete('/teams/:id', [verifyToken, getUser], deleteTeam);
 
 // Transaction Controller
+// Note: Update and delete transaction are not implemented because they are not needed.
 router.post('/transactions', [verifyToken], addTransaction);
+router.get('/transactions', [verifyToken], getAllTransactions);
+router.get('/transactions/:id', [verifyToken], getTransaction);
+
 export default router;

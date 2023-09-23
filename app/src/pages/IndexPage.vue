@@ -24,6 +24,7 @@ import {SiweMessage} from 'siwe';
 import {useFetch} from '@vueuse/core'
 import {useWallet} from '../composables/wallet';
 import TeamComponent from '../components/TeamComponent.vue';
+import {onMounted} from 'vue';
 
 const {isConnected, connectWallet} = useWallet()
 const appStore = useAppStore()
@@ -47,7 +48,7 @@ const {execute, isFetching, isFinished, error, data: teams} = useFetch(BACKEND_A
     }
   },
   immediate: false
-})
+}).json()
 const domain = window.location.host;
 const origin = window.location.origin;
 const provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -115,5 +116,10 @@ const signInWithEthereum = async () => {
 
   await execute()
 }
+
+onMounted(async () => {
+  if (appStore.getToken)
+    await execute()
+})
 
 </script>

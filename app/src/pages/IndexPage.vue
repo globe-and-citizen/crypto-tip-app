@@ -24,7 +24,7 @@ import {SiweMessage} from 'siwe';
 import {useFetch} from '@vueuse/core'
 import {useWallet} from '../composables/wallet';
 import TeamComponent from '../components/TeamComponent.vue';
-import {onMounted} from 'vue';
+import {onMounted, watchEffect} from 'vue';
 
 const {isConnected, connectWallet} = useWallet()
 const appStore = useAppStore()
@@ -35,7 +35,6 @@ const BACKEND_ADDR = 'http://localhost:3000'
 
 const {execute, isFetching, isFinished, error, data: teams} = useFetch(BACKEND_ADDR + '/teams', {
   beforeFetch({options, cancel}) {
-    console.log('before fetch', appStore.getToken)
     if (!appStore.getToken)
       cancel()
 
@@ -116,6 +115,21 @@ const signInWithEthereum = async () => {
 
   await execute()
 }
+
+watchEffect(() => {
+  if (error.value) {
+    $q.notify({
+      message: error.value,
+      color: 'negative',
+      icon: 'report_problem',
+      position: 'top',
+      timeout: 2000
+    })
+    if (error.value == 'Unauthorized') {
+      appStore.setToken('')
+    }
+  }
+})
 
 onMounted(async () => {
   if (appStore.getToken)

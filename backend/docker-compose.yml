@@ -20,7 +20,9 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "${PORT}:5000" # Map container port to the PORT environment variable
+      - "${PORT}:3000" # Map container port to the PORT environment variable
+    volumes:
+      - ./src:/app/src
     env_file:
       - .env # Specify the .env file
     depends_on:

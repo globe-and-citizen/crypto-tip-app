@@ -4,7 +4,7 @@
   "description": "Crypto Tips Backend",
   "main": "src/index.ts",
   "scripts": {
-    "start": "nodemon src/index.ts",
+    "start": "nodemon --legacy-watch src/index.ts",
     "build": "tsc",
     "prisma:migrate": "npx prisma migrate deploy",
     "prod": "node  dist/index.js",

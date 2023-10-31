@@ -4,7 +4,7 @@ services:
 
   db:
     image: postgres
-#    restart: always
+    #    restart: always
     container_name: postgres_db
     environment:
       POSTGRES_USER: root
@@ -14,17 +14,26 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-  app:
+  api:
     build:
-      context: .
+      context: ./backend
       dockerfile: Dockerfile
     ports:
       - "${PORT}:3000" # Map container port to the PORT environment variable
     volumes:
-      - ./src:/app/src
+      - ./backend/src:/app/src
     env_file:
-      - .env # Specify the .env file
+      # the env file inside the backend folder
+      - ./backend/.env
     depends_on:
-          - db
+      - db
+  app:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    ports:
+      - "9200:9200" # Map container port to the PORT environment variable
+    volumes:
+      - ./src:/app/src
 volumes:
   postgres_data:

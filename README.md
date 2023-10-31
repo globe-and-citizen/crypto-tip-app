@@ -27,12 +27,15 @@ This folder contains the smart contract. It is built using [Solidity](https://do
 
 ## Prerequisites
 
+Before getting started with Crypto Tip, make sure you have the following prerequisites installed:
+
 - [Node.js](https://nodejs.org/en/) (v14.17.0)
 - [Metamask](https://metamask.io/) (v10.0.5)
 - [Docker](https://www.docker.com/) (v20.10.7)
 - [Docker Compose](https://docs.docker.com/compose/) (v1.29.2)
 
 ## Setup
+Follow these steps to set up Crypto Tip:
 
 ### Clone repository
 

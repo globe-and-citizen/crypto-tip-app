@@ -16,7 +16,7 @@ npm run dev
 
 ### Build the app for production
 ```bash
-quasar build
+npm run build
 ```
 
 ### Tech stack

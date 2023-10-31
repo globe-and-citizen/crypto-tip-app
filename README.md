@@ -11,15 +11,15 @@ Crypto Tips is an innovative application designed to simplify cryptocurrency tip
 └── contract
 ```
 
-## app
+## ./app
 
 This folder contains the frontend application. It is built using [Quasar](https://quasar.dev/). The application is a single page application (SPA) that uses Vue.js and Typescript. The frontend app interact with the backend and the smart contract
 
-## backend
+## ./backend
 
 This folder contains the backend application. It is built using [Express](https://expressjs.com/). The backend application is a REST API that is used by the frontend application.
 
-## contract
+## ./contract
 
 This folder contains the smart contract. It is built using [Solidity](https://docs.soliditylang.org/en/v0.8.6/). The smart contract is deployed on the Polygon blockchain.
 
@@ -40,15 +40,38 @@ This folder contains the smart contract. It is built using [Solidity](https://do
 git clone https://github.com/globe-and-citizen/crypto-tip-app.git
 ```
 
-### Run in docker containers
+### 1- Run in docker containers
 
-
-
-### Install dependencies
+#### Start the containers
 
 ```bash
 cd crypto-tip-app
-yarn
+docker-compose up -d
+```
+
+Then access the app at [http://localhost:9200](http://localhost:9200)
+
+### 2- Run locally
+
+#### Install dependencies
+
+Run inside these folders : `./app`, `./backend` and `./contract`
+
+```bash
+npm install
 ```
 
 ### Start the app in development mode
+
+In `./app` folder
+
+```bash
+npm run dev
+```
+
+In `./backend` folder
+
+```bash
+npm run start
+```
+Then access the app at [http://localhost:9200](http://localhost:9200)

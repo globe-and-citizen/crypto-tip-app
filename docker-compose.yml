@@ -1,0 +1,30 @@
+version: '3.1'
+
+services:
+
+  db:
+    image: postgres
+#    restart: always
+    container_name: postgres_db
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: cypto-db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "${PORT}:3000" # Map container port to the PORT environment variable
+    volumes:
+      - ./src:/app/src
+    env_file:
+      - .env # Specify the .env file
+    depends_on:
+          - db
+volumes:
+  postgres_data:

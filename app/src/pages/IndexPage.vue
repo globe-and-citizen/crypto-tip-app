@@ -1,52 +1,71 @@
 <template>
-  <AppHeader title="Crypto Tips" @toggleRightDrawer="appStore.toggleDrawer()"/>
+  <AppHeader title="Crypto Tips" @toggleRightDrawer="appStore.toggleDrawer()" />
   <q-page style="max-width: 768px; width: 100%">
-    <div v-if="isAuthenticated" class="q-pa-md">
-      <TeamComponent v-for="team in teams" :key="team.uid" :team="team"></TeamComponent>
+    <div v-if="appStore.getToken" class="q-pa-md">
+      <div v-if="!error && isFinished && !isFetching">
+        <TeamComponent v-for="team in teams" :key="team.uid" :team="team"></TeamComponent>
+      </div>
       <div class="row justify-center q-pa-xl">
         <q-btn to="/addTeam" data-cy="add_team"> Add Team</q-btn>
       </div>
     </div>
     <div v-else class="q-pa-xl">
-      <q-btn @click="signIn" icon="google" data-cy="sign_in"> Sign In with Google</q-btn>
       <q-btn @click="signInWithEthereum" icon="google" data-cy="sign_in"> Sign In with Ethereum</q-btn>
     </div>
   </q-page>
 </template>
 
 <script setup lang="ts">
-import {useFirebase} from 'src/composables/firebase'
-import {useFirestore, useAuth} from '@vueuse/firebase'
-import {doc, setDoc, collection, where, query} from 'firebase/firestore'
-import {GoogleAuthProvider, signInWithPopup, signInAnonymously, getAdditionalUserInfo} from 'firebase/auth'
-import {computed} from 'vue'
 import AppHeader from 'components/AppHeader.vue'
-import {useAppStore} from 'src/stores'
-import TeamComponent from 'components/TeamComponent.vue'
-import {useQuasar} from 'quasar'
-import {useWallet} from '../composables/wallet';
-import {ethers} from 'ethers';
-import {SiweMessage} from 'siwe';
+import { useAppStore } from 'src/stores'
+import { useQuasar } from 'quasar'
+import { ethers } from 'ethers'
+import { SiweMessage } from 'siwe'
+import { useFetch } from '@vueuse/core'
+import { useWallet } from '../composables/wallet'
+import TeamComponent from '../components/TeamComponent.vue'
+import { onMounted, watchEffect } from 'vue'
 
+const { isConnected, connectWallet } = useWallet()
 const appStore = useAppStore()
 
-const {auth, db} = useFirebase()
-const {isAuthenticated, user} = useAuth(auth)
 const $q = useQuasar()
 
-const {isConnected, connectWallet, userAddress} = useWallet()
 const BACKEND_ADDR = 'http://localhost:3000'
 
-const domain = window.location.host;
-const origin = window.location.origin;
-const provider = new ethers.providers.Web3Provider(window.ethereum);
-let address;
+const {
+  execute,
+  isFetching,
+  isFinished,
+  error,
+  data: teams,
+} = useFetch(BACKEND_ADDR + '/teams', {
+  beforeFetch({ options, cancel }) {
+    if (!appStore.getToken) cancel()
+
+    options.headers = {
+      ...options.headers,
+      Authorization: `Bearer ${appStore.getToken}`,
+    }
+    return {
+      options,
+    }
+  },
+  immediate: false,
+}).json()
+const domain = window.location.host
+const origin = window.location.origin
+const provider = new ethers.providers.Web3Provider(window.ethereum)
+let address
 
 async function createSiweMessage(address, statement) {
-  const res = await fetch(`${BACKEND_ADDR}/nonce`, {
+  const { isFetching, isFinished, error, data } = useFetch(`${BACKEND_ADDR}/nonce`, {
     credentials: 'include',
-  });
-  const nonce = await res.text();
+  })
+  // Log useFetch Outpus values
+  console.log(isFetching.value)
+  console.log(data.value, 'data')
+  console.log(error.value, 'error')
   const message = new SiweMessage({
     domain,
     address,
@@ -54,75 +73,73 @@ async function createSiweMessage(address, statement) {
     uri: origin,
     version: '1',
     chainId: '1',
-    nonce
-  });
-  return message.prepareMessage();
+    nonce: data.value,
+  })
+  return message.prepareMessage()
 }
 
 const signInWithEthereum = async () => {
-
-  const signer = await provider.getSigner();
+  console.log('is connected', isConnected.value)
+  if (!isConnected.value) {
+    await connectWallet()
+  }
+  const signer = await provider.getSigner()
   address = await signer.getAddress()
-  const message = await createSiweMessage(
-    address,
-    'Sign in with Ethereum to the Crypto Tips.'
-  );
-  const signature = await signer.signMessage(message);
-  console.log('message : \n', message)
-  console.log('signature : \n', signature)
-
+  const message = await createSiweMessage(address, 'Sign in with Ethereum to the Crypto Tips.')
+  const signature = await signer.signMessage(message)
   const res = await fetch(`${BACKEND_ADDR}/verify`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({message, signature}),
-    credentials: 'include'
-  });
+    body: JSON.stringify({ message, signature }),
+    credentials: 'include',
+  })
+
+  if (res.status == 201) {
+    $q.notify({
+      message: 'Welcome to our platform! ',
+      color: 'positive',
+      icon: 'check',
+      position: 'top',
+      timeout: 2000,
+    })
+  } else if (res.status == 200) {
+    $q.notify({
+      message: "Welcome back! It's great to see you again.",
+      color: 'positive',
+      icon: 'check',
+      position: 'top',
+      timeout: 2000,
+    })
+  }
 
   if (!res.ok) {
-    console.error(`Failed to verify the signature: ${res.statusText}`);
+    console.error(`Failed to verify the signature: ${res.statusText}`)
     return
   }
-  const {token} = await res.json();
-  const data = await fetch(`${BACKEND_ADDR}/personal_info`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': token,
+  const { token } = await res.json()
+  appStore.setToken(token)
+
+  await execute()
+}
+
+watchEffect(() => {
+  if (error.value) {
+    $q.notify({
+      message: error.value,
+      color: 'negative',
+      icon: 'report_problem',
+      position: 'top',
+      timeout: 2000,
+    })
+    if (error.value == 'Unauthorized') {
+      appStore.setToken('')
     }
-  });
-  if (!data.ok) {
-    console.error(`Failed in getInformation: ${res.statusText}`);
-    return
   }
+})
 
-  console.log('response', await data.json());
-}
-const signIn = () => {
-  if (import.meta.env.VITE_MODE == 'test') {
-    signInAnonymously(auth).then(async (result) => {
-      const isNewUser = getAdditionalUserInfo(result)?.isNewUser
-      const {uid} = result.user
-      if (isNewUser) {
-        await setDoc(doc(db, 'users', uid), {email: '', displayName: '', photoURL: ''})
-      }
-    })
-  } else {
-    signInWithPopup(auth, new GoogleAuthProvider()).then(async (result) => {
-      const isNewUser = getAdditionalUserInfo(result)?.isNewUser
-      const {email, displayName, photoURL, uid} = result.user
-      if (isNewUser) {
-        await setDoc(doc(db, 'users', uid), {email, displayName, photoURL})
-        $q.notify({type: 'info', message: 'Welcome to our platform! '})
-      } else {
-        $q.notify({type: 'info', message: 'Welcome back! It\'s great to see you again.'})
-      }
-    })
-  }
-}
-
-const teamsQuery = computed(() => query(collection(db, 'teams'), where('user', '==', user.value ? user.value.uid : '')))
-
-const teams = useFirestore(teamsQuery, undefined, {autoDispose: false})
+onMounted(async () => {
+  if (appStore.getToken) await execute()
+})
 </script>

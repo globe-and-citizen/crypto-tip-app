@@ -12,6 +12,14 @@ const getNonce = async (req: Request, res: Response) => {
 
 const secretKey = process.env.SECRET_KEY as string;
 const sessionExpiry = '1h'; // Set the session expiry time to 1 hour.
+
+/**
+ * Verify the signature and return a JWT token
+ * check if user exists, if not create a new user record
+ *
+ * @param req
+ * @param res
+ */
 const verify = async (req: Request, res: Response) => {
     try {
         const {message, signature} = req.body;

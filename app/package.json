@@ -27,6 +27,7 @@
     "ethers": "^5.0.0",
     "firebase": "^9.19.1",
     "pinia": "^2.0.11",
+    "pinia-plugin-persistedstate": "^3.2.0",
     "quasar": "^2.6.0",
     "siwe": "^2.1.4",
     "ulid": "^2.3.0",

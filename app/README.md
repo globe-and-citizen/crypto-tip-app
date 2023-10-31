@@ -1,6 +1,6 @@
 # Crypto Tip (crypto-tip-app)
 
-Crypto Tip App to interact with Crypto Tip Smart Contract
+The frontend of the Crypto Tip application is the user interface that you interact with. It's like the "face" of the application, designed to make cryptocurrency tipping within teams easy and user-friendly. It uses modern web technologies like Vue.js and Typescript to provide you with a seamless and intuitive experience.
 
 ## Install the dependencies
 ```bash
@@ -9,33 +9,17 @@ yarn
 npm install
 ```
 
-### Start the app in development mode (hot-code reloading, error reporting, etc.)
+### Start the app in development mode
 ```bash
-quasar dev
+npm run dev
 ```
-
-
-### Lint the files
-```bash
-yarn lint
-# or
-npm run lint
-```
-
-
-### Format the files
-```bash
-yarn format
-# or
-npm run format
-```
-
-
 
 ### Build the app for production
 ```bash
 quasar build
 ```
 
-### Customize the configuration
-See [Configuring quasar.config.js](https://v2.quasar.dev/quasar-cli-vite/quasar-config-js).
+### Tech stack
+- [Quasar](https://quasar.dev/)
+- [Vue.js](https://vuejs.org/)
+- [Typescript](https://www.typescriptlang.org/)

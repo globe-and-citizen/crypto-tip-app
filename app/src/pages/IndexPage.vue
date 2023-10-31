@@ -1,5 +1,5 @@
 <template>
-  <AppHeader title="Crypto Tips" @toggleRightDrawer="appStore.toggleDrawer()"/>
+  <AppHeader title="Crypto Tips" @toggleRightDrawer="appStore.toggleDrawer()" />
   <q-page style="max-width: 768px; width: 100%">
     <div v-if="appStore.getToken" class="q-pa-md">
       <div v-if="!error && isFinished && !isFetching">
@@ -17,26 +17,31 @@
 
 <script setup lang="ts">
 import AppHeader from 'components/AppHeader.vue'
-import {useAppStore} from 'src/stores'
-import {useQuasar} from 'quasar'
-import {ethers} from 'ethers';
-import {SiweMessage} from 'siwe';
-import {useFetch} from '@vueuse/core'
-import {useWallet} from '../composables/wallet';
-import TeamComponent from '../components/TeamComponent.vue';
-import {onMounted, watchEffect} from 'vue';
+import { useAppStore } from 'src/stores'
+import { useQuasar } from 'quasar'
+import { ethers } from 'ethers'
+import { SiweMessage } from 'siwe'
+import { useFetch } from '@vueuse/core'
+import { useWallet } from '../composables/wallet'
+import TeamComponent from '../components/TeamComponent.vue'
+import { onMounted, watchEffect } from 'vue'
 
-const {isConnected, connectWallet} = useWallet()
+const { isConnected, connectWallet } = useWallet()
 const appStore = useAppStore()
 
 const $q = useQuasar()
 
 const BACKEND_ADDR = 'http://localhost:3000'
 
-const {execute, isFetching, isFinished, error, data: teams} = useFetch(BACKEND_ADDR + '/teams', {
-  beforeFetch({options, cancel}) {
-    if (!appStore.getToken)
-      cancel()
+const {
+  execute,
+  isFetching,
+  isFinished,
+  error,
+  data: teams,
+} = useFetch(BACKEND_ADDR + '/teams', {
+  beforeFetch({ options, cancel }) {
+    if (!appStore.getToken) cancel()
 
     options.headers = {
       ...options.headers,
@@ -46,18 +51,21 @@ const {execute, isFetching, isFinished, error, data: teams} = useFetch(BACKEND_A
       options,
     }
   },
-  immediate: false
+  immediate: false,
 }).json()
-const domain = window.location.host;
-const origin = window.location.origin;
-const provider = new ethers.providers.Web3Provider(window.ethereum);
-let address;
+const domain = window.location.host
+const origin = window.location.origin
+const provider = new ethers.providers.Web3Provider(window.ethereum)
+let address
 
 async function createSiweMessage(address, statement) {
-  const res = await fetch(`${BACKEND_ADDR}/nonce`, {
+  const { isFetching, isFinished, error, data } = useFetch(`${BACKEND_ADDR}/nonce`, {
     credentials: 'include',
-  });
-  const nonce = await res.text();
+  })
+  // Log useFetch Outpus values
+  console.log(isFetching.value)
+  console.log(data.value, 'data')
+  console.log(error.value, 'error')
   const message = new SiweMessage({
     domain,
     address,
@@ -65,9 +73,9 @@ async function createSiweMessage(address, statement) {
     uri: origin,
     version: '1',
     chainId: '1',
-    nonce
-  });
-  return message.prepareMessage();
+    nonce: data.value,
+  })
+  return message.prepareMessage()
 }
 
 const signInWithEthereum = async () => {
@@ -75,18 +83,18 @@ const signInWithEthereum = async () => {
   if (!isConnected.value) {
     await connectWallet()
   }
-  const signer = await provider.getSigner();
+  const signer = await provider.getSigner()
   address = await signer.getAddress()
-  const message = await createSiweMessage(address, 'Sign in with Ethereum to the Crypto Tips.');
-  const signature = await signer.signMessage(message);
+  const message = await createSiweMessage(address, 'Sign in with Ethereum to the Crypto Tips.')
+  const signature = await signer.signMessage(message)
   const res = await fetch(`${BACKEND_ADDR}/verify`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({message, signature}),
-    credentials: 'include'
-  });
+    body: JSON.stringify({ message, signature }),
+    credentials: 'include',
+  })
 
   if (res.status == 201) {
     $q.notify({
@@ -94,23 +102,23 @@ const signInWithEthereum = async () => {
       color: 'positive',
       icon: 'check',
       position: 'top',
-      timeout: 2000
+      timeout: 2000,
     })
   } else if (res.status == 200) {
     $q.notify({
-      message: 'Welcome back! It\'s great to see you again.',
+      message: "Welcome back! It's great to see you again.",
       color: 'positive',
       icon: 'check',
       position: 'top',
-      timeout: 2000
+      timeout: 2000,
     })
   }
 
   if (!res.ok) {
-    console.error(`Failed to verify the signature: ${res.statusText}`);
+    console.error(`Failed to verify the signature: ${res.statusText}`)
     return
   }
-  const {token} = await res.json();
+  const { token } = await res.json()
   appStore.setToken(token)
 
   await execute()
@@ -123,7 +131,7 @@ watchEffect(() => {
       color: 'negative',
       icon: 'report_problem',
       position: 'top',
-      timeout: 2000
+      timeout: 2000,
     })
     if (error.value == 'Unauthorized') {
       appStore.setToken('')
@@ -132,8 +140,6 @@ watchEffect(() => {
 })
 
 onMounted(async () => {
-  if (appStore.getToken)
-    await execute()
+  if (appStore.getToken) await execute()
 })
-
 </script>

@@ -13,11 +13,5 @@ RUN npm install
 # Copy the rest of the application code
 COPY . .
 
-# Generate Prisma Client
-RUN npx prisma generate
-
-# Expose the port defined in the environment variable
-ENV PORT $PORT
-
 # Command to run your Node.js application
-CMD ["npm", "run", "start"]
+CMD ["npm", "run", "dev"]

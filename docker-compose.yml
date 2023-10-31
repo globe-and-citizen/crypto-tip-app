@@ -19,12 +19,9 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     ports:
-      - "${PORT}:3000" # Map container port to the PORT environment variable
+      - "3000:3000" # Map container port to the PORT environment variable
     volumes:
       - ./backend/src:/app/src
-    env_file:
-      # the env file inside the backend folder
-      - ./backend/.env
     depends_on:
       - db
   app:
@@ -34,6 +31,6 @@ services:
     ports:
       - "9200:9200" # Map container port to the PORT environment variable
     volumes:
-      - ./src:/app/src
+      - ./app/src:/app/src
 volumes:
   postgres_data:

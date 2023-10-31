@@ -1,7 +1,14 @@
-# nft_mgt_protocol
-A experimental service for distributing fiancial incentives to open source contributors and organizing executive and managerial decisions internationally using NFTs and other DeFi technology.
+# Crypto Tip Smart Contract (crypto-tip-contract)
 
-[![built-with openzeppelin](https://img.shields.io/badge/built%20with-OpenZeppelin-3677FF)](https://docs.openzeppelin.com/)
+The smart contract is the heart of Crypto Tip. It's like a digital agreement that automatically distributes cryptocurrency tips among team members fairly and transparently. Written in Solidity, this contract is deployed on the Polygon blockchain, ensuring the integrity of every tip transaction and promoting trust and equality within your team.
+
+## Install the dependencies
+```bash
+yarn
+# or
+npm install
+```
+
 
 ```shell
 npx hardhat help

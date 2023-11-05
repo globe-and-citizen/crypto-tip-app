@@ -46,7 +46,6 @@ import { useRouter } from 'vue-router'
 import { ref } from 'vue'
 import { deleteDoc, doc, setDoc } from 'firebase/firestore'
 import { QForm, useQuasar } from 'quasar'
-import { timeout } from 'workbox-core/_private'
 import abi from '../utils/CryptoTip.json'
 import { ethers } from 'ethers'
 import { shortAddress } from 'src/utils/utilitites'
@@ -89,18 +88,41 @@ const { data: teamData } = useFetch(BACKEND_ADDR + '/teams/' + id, {
   },
   immediate: true,
 }).json()
+const {
+  data,
+  execute: deleteTeam,
+  onFetchResponse,
+} = useFetch(
+  BACKEND_ADDR + '/teams/' + id,
+  {
+    method: 'DELETE',
+  },
+  {
+    beforeFetch({ options, cancel }) {
+      if (!appStore.getToken) cancel()
+      options.headers = {
+        ...options.headers,
+        Authorization: `Bearer ${appStore.getToken}`,
+      }
+      return {
+        options,
+      }
+    },
+    immediate: false,
+  }
+).json()
+onFetchResponse((response) => {
+  if (response.ok) {
+    $q.notify({ type: 'positive', message: 'Team Remove Successfully' })
+    setTimeout(() => {
+      router.push('/')
+    }, 3000)
+  }
+})
 const tipsForm = ref<QForm | null>(null)
 const loading = ref(false)
 
 const web3_network = import.meta.env.WEB3_NETWORK ? import.meta.env.WEB3_NETWORK : 'any'
-const deleteTeam = () => {
-  deleteDoc(doc(db, 'teams', teamData.value?.uid as string))
-
-  $q.notify({ type: 'negative', message: 'Team Remove Successfully' })
-  timeout(3000)
-  router.push('/')
-}
-
 const sendTips = async () => {
   loading.value = true
   try {

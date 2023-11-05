@@ -62,6 +62,15 @@
           <q-item-label>Withdraw</q-item-label>
         </q-item-section>
       </q-item>
+      <q-item clickable tag="a" v-if="appStore.getToken" @click="appStore.setToken('')">
+        <q-item-section avatar>
+          <q-icon name="logout" />
+        </q-item-section>
+
+        <q-item-section>
+          <q-item-label>Logout</q-item-label>
+        </q-item-section>
+      </q-item>
     </q-drawer>
     <q-page-container class="row justify-center items-top">
       <router-view />

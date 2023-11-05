@@ -24,6 +24,9 @@ services:
       - ./backend/src:/app/src
     depends_on:
       - db
+    environment:
+      DATABASE_URL: postgres://root:root@db:5432/crypto-db
+      PORT: 3000
   app:
     build:
       context: ./app

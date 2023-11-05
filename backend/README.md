@@ -2,6 +2,14 @@
 
 The backend of Crypto Tip serves as the "engine" that powers the application. It's responsible for processing requests from the frontend and ensuring that everything runs smoothly. Built using Express, it provides a robust and secure REST API that connects the frontend to the underlying smart contract and blockchain infrastructure.
 
+## .env files
+Copy .env.example to .env or .env.local
+
+````bash
+cp .env.example .env
+````
+Then update the .env file with your information. 
+
 ## Install the dependencies
 ```bash
 yarn

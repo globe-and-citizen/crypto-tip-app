@@ -41,17 +41,18 @@ import AppHeader from 'components/AppHeader.vue'
 import { useAppStore } from 'src/stores'
 import { useFirebase } from 'src/composables/firebase'
 import { useWallet } from 'src/composables/wallet'
-import { useAuth, useFirestore } from '@vueuse/firebase'
+import { useAuth } from '@vueuse/firebase'
 import { useRouter } from 'vue-router'
-import { computed, ref, Ref } from 'vue'
+import { ref } from 'vue'
 import { deleteDoc, doc, setDoc } from 'firebase/firestore'
-import { useQuasar } from 'quasar'
+import { QForm, useQuasar } from 'quasar'
 import { timeout } from 'workbox-core/_private'
-import { Team } from 'src/model/Team'
 import abi from '../utils/CryptoTip.json'
 import { ethers } from 'ethers'
 import { shortAddress } from 'src/utils/utilitites'
+import { useFetch } from '@vueuse/core'
 
+const BACKEND_ADDR = 'http://localhost:3000'
 const router = useRouter()
 if (!router.currentRoute.value.params.ulid) {
   router.push('/404')
@@ -74,10 +75,20 @@ const contractABI = abi.abi
 const tipsAmount = ref('')
 
 const id = router.currentRoute.value.params.ulid
-const teamQuery = computed(() => doc(db, 'teams', id as string))
-const teamData = useFirestore(teamQuery, null) as Ref<Team | undefined | null>
-import { QForm } from 'quasar'
 
+const { data: teamData } = useFetch(BACKEND_ADDR + '/teams/' + id, {
+  beforeFetch({ options, cancel }) {
+    if (!appStore.getToken) cancel()
+    options.headers = {
+      ...options.headers,
+      Authorization: `Bearer ${appStore.getToken}`,
+    }
+    return {
+      options,
+    }
+  },
+  immediate: true,
+}).json()
 const tipsForm = ref<QForm | null>(null)
 const loading = ref(false)
 

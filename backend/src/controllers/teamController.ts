@@ -57,10 +57,6 @@ const getAllTeams = async (req: Request, res: Response) => {
                 ownerId: req.body.decoded.address
             }
         })
-        if (!teams || teams.length === 0) {
-            // Return a 404 response and exit the function
-            return res.status(404).json({message: 'No teams found'});
-        }
         res.status(200).json(teams);
     } catch (e) {
         console.log('Error: ', e)

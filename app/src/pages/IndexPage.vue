@@ -58,22 +58,19 @@ const origin = window.location.origin
 const provider = new ethers.providers.Web3Provider(window.ethereum)
 let address
 
-async function createSiweMessage(address, statement) {
-  const { isFetching, isFinished, error, data } = useFetch(`${BACKEND_ADDR}/nonce`, {
+async function createSiweMessage(address: string, statement: string) {
+  const { isFetching, isFinished, error, data } = useFetch<string>(`${BACKEND_ADDR}/nonce`, {
     credentials: 'include',
   })
-  // Log useFetch Outpus values
-  console.log(isFetching.value)
-  console.log(data.value, 'data')
-  console.log(error.value, 'error')
+  // TODO: handle error from the backend
   const message = new SiweMessage({
     domain,
     address,
     statement,
     uri: origin,
     version: '1',
-    chainId: '1',
-    nonce: data.value,
+    chainId: 1,
+    nonce: data.value ? data.value : '',
   })
   return message.prepareMessage()
 }

@@ -16,7 +16,7 @@
 import { useRouter } from 'vue-router'
 
 interface TeamType {
-  uid: string
+  id: string
   name: string
   description: string
 }
@@ -30,7 +30,7 @@ const props = defineProps<Props>()
 const router = useRouter()
 
 function goToUrl() {
-  router.push('/showTeam/' + props.team.uid)
+  router.push('/showTeam/' + props.team.id)
 }
 </script>
 

@@ -39,7 +39,7 @@ const getTeam = async (req: Request, res: Response) => {
         if (!team) {
             return res.status(404).json({error: 'Team not found'});
         }
-        if (team.ownerId !== req.body.user.address) {
+        if (team.ownerId !== req.body.decoded.address) {
             return res.status(401).json({error: 'Unauthorized'});
         }
         res.status(200).json(team);

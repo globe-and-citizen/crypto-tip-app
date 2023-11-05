@@ -1,10 +1,10 @@
 <template>
-  <AppHeader title="Create New Team" back_link="/" @toggleRightDrawer="appStore.toggleDrawer()"/>
+  <AppHeader title="Create New Team" back_link="/" @toggleRightDrawer="appStore.toggleDrawer()" />
   <q-page style="max-width: 768px" class="full-width">
     <div class="q-pa-md">
       <q-form @submit="onSubmit()" @reset="onReset" class="q-gutter-md">
-        <q-input outlined v-model="team.name" label="Team Name"/>
-        <q-input outlined v-model="team.description" type="textarea" label="Description"/>
+        <q-input outlined v-model="team.name" label="Team Name" />
+        <q-input outlined v-model="team.description" type="textarea" label="Description" />
         <q-input
           outlined
           v-for="(m, i) in team.members"
@@ -15,14 +15,14 @@
           :rules="[(value) => isAddress(value) || 'You need to add a valid address']"
         >
           <template v-slot:before>
-            <q-icon name="add" color="primary" @click="addTeamMember(i + 1)"/>
-            <q-icon name="remove" color="red" @click="removeTeamMember(i)" v-if="team.members.length > 1"/>
+            <q-icon name="add" color="primary" @click="addTeamMember(i + 1)" />
+            <q-icon name="remove" color="red" @click="removeTeamMember(i)" v-if="team.members.length > 1" />
           </template>
         </q-input>
 
         <div>
-          <q-btn label="Add Team" type="submit  " color="primary"/>
-          <q-btn label="Reset" type="reset" color="primary" flat class="q-ml-sm"/>
+          <q-btn label="Add Team" type="submit  " color="primary" />
+          <q-btn label="Reset" type="reset" color="primary" flat class="q-ml-sm" />
         </div>
       </q-form>
     </div>
@@ -31,12 +31,12 @@
 
 <script setup lang="ts">
 import AppHeader from 'components/AppHeader.vue'
-import {useAppStore} from 'src/stores'
-import {ref} from 'vue'
-import {useQuasar} from 'quasar'
-import {ethers} from 'ethers'
-import {useRouter} from 'vue-router'
-import {useFetch} from '@vueuse/core';
+import { useAppStore } from 'src/stores'
+import { ref, watchEffect } from 'vue'
+import { useQuasar } from 'quasar'
+import { ethers } from 'ethers'
+import { useRouter } from 'vue-router'
+import { useFetch } from '@vueuse/core'
 
 const BACKEND_ADDR = 'http://localhost:3000'
 const appStore = useAppStore()
@@ -52,12 +52,9 @@ const initialTeamValue = {
 }
 const team = ref(initialTeamValue)
 
-const {execute, isFetching, isFinished, error, data} = useFetch(BACKEND_ADDR + '/teams', {
-  beforeFetch({options, cancel}) {
-    console.log('before fetch', appStore.getToken)
-    if (!appStore.getToken)
-      cancel()
-    console.log('team', team.value)
+const { execute, isFetching, isFinished, error, data } = useFetch(BACKEND_ADDR + '/teams', {
+  beforeFetch({ options, cancel }) {
+    if (!appStore.getToken) cancel()
     options.body = JSON.stringify(team.value)
 
     options.headers = {
@@ -68,14 +65,23 @@ const {execute, isFetching, isFinished, error, data} = useFetch(BACKEND_ADDR + '
       options,
     }
   },
-  // afterFetch({options, response}) {
-  //   if(response.status==201){
-  //     $q.notify({type: 'positive', message: 'Team successfully Created'})
-  //   }
-  //   return response
-  // },
-  immediate: false
-}).post().json()
+  immediate: false,
+})
+  .post()
+  .json()
+
+watchEffect(() => {
+  if (isFinished.value && data.value) {
+    $q.notify({ type: 'positive', message: 'Team successfully Created' })
+    setTimeout(() => {
+      $q.notify({ type: 'positive', message: 'Redirection to Homepage in 2s' })
+    }, 1000)
+
+    setTimeout(() => {
+      router.push('/')
+    }, 3000)
+  }
+})
 const addTeamMember = function (index: number) {
   team.value.members.splice(index, 0, '')
 }
@@ -84,13 +90,7 @@ const removeTeamMember = function (index: number) {
   team.value.members.splice(index, 1)
 }
 const onSubmit = async function () {
-  console.log('Submit')
   await execute()
-
-  onReset()
-
-  $q.notify({type: 'positive', message: 'Team successfully Created'})
-
 }
 const onReset = function () {
   team.value = {

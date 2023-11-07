@@ -16,7 +16,6 @@
         >
           <template v-slot:before>
             <q-icon name="add" color="primary" @click="addTeamMember(i + 1)" />
-            <q-icon name="remove" v-if="i !== team.members.length - 1" />
             <q-icon name="remove" color="red" @click="removeTeamMember(i)" v-if="team.members.length > 1" />
           </template>
         </q-input>
@@ -32,14 +31,11 @@
 <script setup lang="ts">
 import AppHeader from 'components/AppHeader.vue'
 import { useAppStore } from 'src/stores'
-import { computed, Ref } from 'vue'
-import { useFirebase } from 'src/composables/firebase'
-import { useAuth, useFirestore } from '@vueuse/firebase'
-import { doc, setDoc } from 'firebase/firestore'
+import { ref } from 'vue'
 import { useQuasar } from 'quasar'
 import { ethers } from 'ethers'
 import { useRouter } from 'vue-router'
-import { Team } from 'src/model/Team'
+import { useFetch } from '@vueuse/core'
 
 const router = useRouter()
 if (!router.currentRoute.value.params.ulid) {
@@ -48,16 +44,66 @@ if (!router.currentRoute.value.params.ulid) {
 
 const $q = useQuasar()
 const appStore = useAppStore()
-const { auth, db } = useFirebase()
-const { isAuthenticated } = useAuth(auth)
 
+const BACKEND_ADDR = 'http://localhost:3000'
 const id = router.currentRoute.value.params.ulid
-const teamQuery = computed(() => doc(db, 'teams', id as string))
-const team = useFirestore(teamQuery, null) as Ref<Team | undefined | null>
 
-if (!isAuthenticated) {
-  // TODO redirect to home page
-}
+const { data: teamData, onFetchResponse } = useFetch(BACKEND_ADDR + '/teams/' + id, {
+  beforeFetch({ options, cancel }) {
+    if (!appStore.getToken) cancel()
+    options.headers = {
+      ...options.headers,
+      Authorization: `Bearer ${appStore.getToken}`,
+    }
+    return {
+      options,
+    }
+  },
+  immediate: true,
+}).json()
+const { execute: updateTeam, onFetchResponse: onFetchResponseUpdate } = useFetch(
+  BACKEND_ADDR + '/teams/' + id,
+  {
+    method: 'PUT',
+  },
+  {
+    beforeFetch({ options, cancel }) {
+      if (!appStore.getToken) cancel()
+      options.body = JSON.stringify(team.value)
+
+      options.headers = {
+        ...options.headers,
+        'Content-Type': 'application/json',
+        accept: 'application/json',
+        Authorization: `Bearer ${appStore.getToken}`,
+      }
+      return {
+        options,
+      }
+    },
+    immediate: false,
+  }
+).json()
+
+const team = ref()
+onFetchResponse((response) => {
+  if (response.ok) {
+    team.value = teamData.value
+  }
+})
+
+onFetchResponseUpdate((response) => {
+  if (response.ok) {
+    $q.notify({ type: 'positive', message: 'Team successfully Updated' })
+    setTimeout(() => {
+      $q.notify({ type: 'positive', message: 'Redirection to Homepage in 2s' })
+    }, 1000)
+
+    setTimeout(() => {
+      router.push('/showTeam/' + id)
+    }, 3000)
+  }
+})
 
 const addTeamMember = function (index: number) {
   if (team.value) {
@@ -72,10 +118,7 @@ const removeTeamMember = function (index: number) {
 }
 const onSubmit = async function () {
   if (team.value) {
-    await setDoc(doc(db, 'teams', team.value?.uid), team.value).then(function () {
-      $q.notify({ type: 'positive', message: 'Team successfully Updated' })
-      router.push('/')
-    })
+    await updateTeam()
   }
 }
 </script>

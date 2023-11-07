@@ -59,6 +59,8 @@ const { execute, isFetching, isFinished, error, data } = useFetch(BACKEND_ADDR +
 
     options.headers = {
       ...options.headers,
+      'Content-Type': 'application/json',
+      accept: 'application/json',
       Authorization: `Bearer ${appStore.getToken}`,
     }
     return {

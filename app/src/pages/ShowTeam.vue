@@ -24,7 +24,9 @@
           v-model="tipsAmount"
           label="Tips Amount"
           :rules="[(val) => (val !== null && val !== '') || 'Please type an Amount', (val) => /^-?\d+(\.\d+)?$/.test(val) || 'Please type a real value']"
-        />
+        >
+          <template v-slot:append> ETH</template>
+        </q-input>
         <div>
           <q-btn :label="value ? 'Send Tips' : 'Push Tips'" type="submit" color="primary" />
         </div>
@@ -39,12 +41,9 @@
 <script setup lang="ts">
 import AppHeader from 'components/AppHeader.vue'
 import { useAppStore } from 'src/stores'
-import { useFirebase } from 'src/composables/firebase'
 import { useWallet } from 'src/composables/wallet'
-import { useAuth } from '@vueuse/firebase'
 import { useRouter } from 'vue-router'
 import { ref } from 'vue'
-import { deleteDoc, doc, setDoc } from 'firebase/firestore'
 import { QForm, useQuasar } from 'quasar'
 import abi from '../utils/CryptoTip.json'
 import { ethers } from 'ethers'
@@ -59,14 +58,10 @@ if (!router.currentRoute.value.params.ulid) {
 
 const $q = useQuasar()
 const appStore = useAppStore()
-const { auth, db } = useFirebase()
-const { isAuthenticated, user } = useAuth(auth)
 const { isConnected, connectWallet } = useWallet()
 const value = ref(true)
 
-if (!isAuthenticated) {
-  router.push('/')
-}
+// TODO : Check authentication
 // Contract Address & ABI
 const contractAddress = '0x8dF19235ca744C3F0A68d259c9625cB9CE92eE82'
 const contractABI = abi.abi
@@ -75,7 +70,7 @@ const tipsAmount = ref('')
 
 const id = router.currentRoute.value.params.ulid
 
-const { data: teamData } = useFetch(BACKEND_ADDR + '/teams/' + id, {
+const { data: teamData, execute } = useFetch(BACKEND_ADDR + '/teams/' + id, {
   beforeFetch({ options, cancel }) {
     if (!appStore.getToken) cancel()
     options.headers = {
@@ -88,6 +83,7 @@ const { data: teamData } = useFetch(BACKEND_ADDR + '/teams/' + id, {
   },
   immediate: true,
 }).json()
+
 const {
   data,
   execute: deleteTeam,
@@ -111,12 +107,43 @@ const {
     immediate: false,
   }
 ).json()
+const transaction = ref()
+const {
+  data: transactionCreated,
+  execute: executeCreateTransaction,
+  onFetchResponse: onFetchResponseCreateTransaction,
+} = useFetch(BACKEND_ADDR + '/transactions/', {
+  beforeFetch({ options, cancel }) {
+    if (!appStore.getToken || !transaction.value) cancel()
+    options.body = JSON.stringify(transaction.value)
+
+    options.headers = {
+      ...options.headers,
+      'Content-Type': 'application/json',
+      accept: 'application/json',
+      Authorization: `Bearer ${appStore.getToken}`,
+    }
+    return {
+      options,
+    }
+  },
+  immediate: false,
+})
+  .post()
+  .json()
+
 onFetchResponse((response) => {
   if (response.ok) {
     $q.notify({ type: 'positive', message: 'Team Remove Successfully' })
     setTimeout(() => {
       router.push('/')
     }, 3000)
+  }
+})
+
+onFetchResponseCreateTransaction((response) => {
+  if (response.ok) {
+    $q.notify({ type: 'positive', message: 'Tips successfully Saved' })
   }
 })
 const tipsForm = ref<QForm | null>(null)
@@ -140,20 +167,20 @@ const sendTips = async () => {
         })
 
         await sendTipsTxn.wait()
-        // Create the transaction in firebase
-        const transaction = {
+        // Create the transaction in fireuserbase
+        transaction.value = {
           hash: sendTipsTxn.hash,
           type: 'sendTips',
           senderAddress: await signer.getAddress(),
           members: teamData.value.members,
+          teamId: teamData.value.id,
           value: tipsAmount.value,
         }
 
         $q.notify({ type: 'positive', message: 'Tips successfully Sent ' + shortAddress(sendTipsTxn.hash) })
-        if (user.value)
-          await setDoc(doc(db, 'users', user.value.uid, 'transactions', sendTipsTxn.hash), transaction).then(function () {
-            $q.notify({ type: 'positive', message: 'Tips successfully Saved' })
-          })
+        // Save the transaction in the API
+        await executeCreateTransaction()
+
         reset()
       } else {
         console.log('Will Push tips')
@@ -163,20 +190,17 @@ const sendTips = async () => {
 
         await sendTipsTxn.wait()
 
-        // Create the transaction in firebase
-        const transaction = {
+        transaction.value = {
           hash: sendTipsTxn.hash,
-          type: 'sendTips',
+          type: 'pushTips',
           senderAddress: await signer.getAddress(),
           members: teamData.value.members,
+          teamId: teamData.value.id,
           value: tipsAmount.value,
         }
-        // Create the transaction in firebase
         $q.notify({ type: 'positive', message: 'Tips successfully Pushed ' + shortAddress(sendTipsTxn.hash) })
-        if (user.value)
-          await setDoc(doc(db, 'users', user.value.uid, 'transactions', sendTipsTxn.hash), transaction).then(function () {
-            $q.notify({ type: 'positive', message: 'Tips successfully Saved' })
-          })
+        // Save the transaction in the API
+        await executeCreateTransaction()
         reset()
       }
     }
@@ -193,12 +217,9 @@ const editTeam = () => {
 
 // to reset validations:
 function reset() {
+  execute()
   tipsAmount.value = '0'
   tipsForm.value?.resetValidation()
-}
-
-if (!isAuthenticated) {
-  // TODO redirect to home page
 }
 </script>
 

@@ -44,19 +44,19 @@
 import AppHeader from 'components/AppHeader.vue'
 import { useAppStore } from 'src/stores'
 import { useWallet } from 'src/composables/wallet'
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { ethers } from 'ethers'
 import abi from 'src/utils/CryptoTip.json'
-import { useAuth, useFirestore } from '@vueuse/firebase'
-import { collection } from 'firebase/firestore'
-import { useFirebase } from 'src/composables/firebase'
 import { shortAddress } from 'src/utils/utilitites'
 import { useRouter } from 'vue-router'
+import { useFetch } from '@vueuse/core'
+import { useQuasar } from 'quasar'
 
 const appStore = useAppStore()
 
 const router = useRouter()
 
+const $q = useQuasar()
 const { isConnected, connectWallet } = useWallet()
 
 // Contract Address & ABI
@@ -67,16 +67,22 @@ const web3_network = import.meta.env.WEB3_NETWORK ? import.meta.env.WEB3_NETWORK
 const walletBalance = ref()
 const contractBalance = ref()
 
-const { auth, db } = useFirebase()
-const { user, isAuthenticated } = useAuth(auth)
-
 let intervalId: string | number | NodeJS.Timeout | undefined
-// watchEffect(() => {
-// })
-// // setTimeout(() => {}, 1000)
-const userQuery = computed(() => user.value?.uid && collection(db, 'users', user.value?.uid, 'transactions'))
-const transactions = useFirestore(userQuery, undefined)
 
+const BACKEND_ADDR = 'http://localhost:3000'
+const { error, data: transactions } = useFetch(BACKEND_ADDR + '/transactions', {
+  beforeFetch({ options, cancel }) {
+    if (!appStore.getToken) cancel()
+
+    options.headers = {
+      ...options.headers,
+      Authorization: `Bearer ${appStore.getToken}`,
+    }
+    return {
+      options,
+    }
+  },
+}).json()
 const columns = [
   {
     name: 'hash',
@@ -109,7 +115,7 @@ onMounted(async () => {
   }, 5000)
 
   setTimeout(() => {
-    if (!isAuthenticated.value) {
+    if (!appStore.getToken) {
       router.push('/')
     }
   }, 5000)

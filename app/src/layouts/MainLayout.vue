@@ -24,15 +24,6 @@
       <!-- drawer content -->
       <q-item-label header> Essential Action</q-item-label>
 
-      <q-item v-if="isAuthenticated" clickable tag="a" @click="logout">
-        <q-item-section avatar>
-          <q-icon name="logout" />
-        </q-item-section>
-
-        <q-item-section>
-          <q-item-label>Log Out</q-item-label>
-        </q-item-section>
-      </q-item>
       <q-item clickable tag="a">
         <q-item-section avatar>
           <q-icon name="wallet" />
@@ -79,9 +70,6 @@
 </template>
 
 <script setup lang="ts">
-import { useFirebase } from 'src/composables/firebase'
-import { useAuth } from '@vueuse/firebase'
-import { signOut } from 'firebase/auth'
 import { useAppStore } from 'src/stores'
 import { useWallet } from 'src/composables/wallet'
 import { shortAddress } from 'src/utils/utilitites'
@@ -94,8 +82,6 @@ import { useRoute } from 'vue-router'
 const route = useRoute()
 const $q = useQuasar()
 const appStore = useAppStore()
-const { auth } = useFirebase()
-const { isAuthenticated } = useAuth(auth)
 const { userAddress, connectWallet } = useWallet()
 const balance = ref('0')
 
@@ -137,7 +123,6 @@ const withdraw = async () => {
     console.log(e)
   }
 }
-const logout = () => signOut(auth)
 
 const onCopy = (value: string) => {
   copyToClipboard(value)

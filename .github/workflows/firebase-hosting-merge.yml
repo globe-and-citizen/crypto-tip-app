@@ -20,8 +20,10 @@ jobs:
           node-version: 18.14.0
           cache: 'npm'
 
-      - run: npm ci & npm run build
+      - name: 💻 Build
+        run: npm ci & npm run build
         working-directory: ./app
+
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'

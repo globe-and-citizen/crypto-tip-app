@@ -13,7 +13,7 @@ jobs:
 
       - name: 🏗 Set up NodeJS 18.14.0
         uses: actions/setup-node@v3
-        working-directory: ./app
+        cache-dependency-path: app
         with:
           node-version: 18.14.0
           cache: 'npm'

@@ -11,15 +11,8 @@ jobs:
       - name: 🛫 Checkout
         uses: actions/checkout@v3
 
-      - name: 🏗 Set up NodeJS 18.14.0
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18.14.0
-          cache: 'npm'
-          cache-dependency-path: app/package-lock.json
-
       - name: 💻 Build
-        run: npm ci & npm run build
+        run: npm install & npm run build
         working-directory: ./app
 
       - uses: FirebaseExtended/action-hosting-deploy@v0

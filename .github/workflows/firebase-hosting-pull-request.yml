@@ -13,10 +13,10 @@ jobs:
 
       - name: 🏗 Set up NodeJS 18.14.0
         uses: actions/setup-node@v3
-        cache-dependency-path: app
         with:
           node-version: 18.14.0
           cache: 'npm'
+          cache-dependency-path: app/package-lock.json
 
       - name: 💻 Build
         run: npm ci & npm run build

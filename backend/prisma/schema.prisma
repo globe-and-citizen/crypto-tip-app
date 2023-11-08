@@ -30,13 +30,14 @@ model Team {
 }
 
 model Transaction {
-  id       Int      @id @default(autoincrement())
-  author   User     @relation(fields: [authorId], references: [address])
-  authorId String
-  team     Team     @relation(fields: [teamId], references: [id])
-  teamId   Int
-  hash     String
-  members  String[]
-  type     String
-  value    String
+  id            Int      @id @default(autoincrement())
+  author        User     @relation(fields: [authorId], references: [address])
+  authorId      String
+  team          Team     @relation(fields: [teamId], references: [id])
+  teamId        Int
+  hash          String
+  senderAddress String
+  members       String[]
+  type          String
+  value         String
 }

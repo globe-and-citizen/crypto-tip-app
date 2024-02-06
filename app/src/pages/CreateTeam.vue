@@ -38,7 +38,7 @@ import { ethers } from 'ethers'
 import { useRouter } from 'vue-router'
 import { useFetch } from '@vueuse/core'
 
-const BACKEND_ADDR = 'http://localhost:3000'
+const BACKEND_ADDR = import.meta.env.VITE_BACKEND_ADDR
 const appStore = useAppStore()
 
 const $q = useQuasar()

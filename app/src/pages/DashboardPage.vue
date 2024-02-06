@@ -69,7 +69,7 @@ const contractBalance = ref()
 
 let intervalId: string | number | NodeJS.Timeout | undefined
 
-const BACKEND_ADDR = 'http://localhost:3000'
+const BACKEND_ADDR = import.meta.env.VITE_BACKEND_ADDR
 const { error, data: transactions } = useFetch(BACKEND_ADDR + '/transactions', {
   beforeFetch({ options, cancel }) {
     if (!appStore.getToken) cancel()

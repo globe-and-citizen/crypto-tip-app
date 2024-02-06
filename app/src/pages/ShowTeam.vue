@@ -50,7 +50,7 @@ import { ethers } from 'ethers'
 import { shortAddress } from 'src/utils/utilitites'
 import { useFetch } from '@vueuse/core'
 
-const BACKEND_ADDR = 'http://localhost:3000'
+const BACKEND_ADDR = import.meta.env.VITE_BACKEND_ADDR
 const router = useRouter()
 if (!router.currentRoute.value.params.ulid) {
   router.push('/404')

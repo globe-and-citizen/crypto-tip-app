@@ -45,7 +45,7 @@ if (!router.currentRoute.value.params.ulid) {
 const $q = useQuasar()
 const appStore = useAppStore()
 
-const BACKEND_ADDR = 'http://localhost:3000'
+const BACKEND_ADDR = import.meta.env.VITE_BACKEND_ADDR
 const id = router.currentRoute.value.params.ulid
 
 const { data: teamData, onFetchResponse } = useFetch(BACKEND_ADDR + '/teams/' + id, {

@@ -7,10 +7,7 @@ const prisma = new PrismaClient()
 
 const app = express();
 app.use(express.json());
-app.use(cors({
-    origin: 'https://crypto-tips-app.netlify.app/',
-    credentials: true,
-}))
+app.use(cors())
 
 app.use(router)
 

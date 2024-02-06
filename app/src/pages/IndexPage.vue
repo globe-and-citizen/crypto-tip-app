@@ -59,9 +59,7 @@ const provider = new ethers.providers.Web3Provider(window.ethereum)
 let address
 
 async function createSiweMessage(address: string, statement: string) {
-  const { isFetching, isFinished, error, data } = useFetch<string>(`${BACKEND_ADDR}/nonce`, {
-    credentials: 'include',
-  })
+  const { isFetching, isFinished, error, data } = useFetch<string>(`${BACKEND_ADDR}/nonce`)
   // TODO: handle error from the backend
   const message = new SiweMessage({
     domain,
@@ -89,8 +87,7 @@ const signInWithEthereum = async () => {
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ message, signature }),
-    credentials: 'include',
+    body: JSON.stringify({ message, signature })
   })
 
   if (res.status == 201) {
